@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+    <bean id="placeholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <!-- For separation of configuration settings per environment, application.properties should be outside the generated
+                WAR, please don't check it in.
+                DO remember to reflect any property changes in the sample and check that in.
+                If you do move your application.properties and modify this config file to reflect that move, do NOT check this file -->
+                <value>file:/srv/appdata/maxeventing/application.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <context:annotation-config />
+
+    <context:component-scan base-package="com.max.web.services" />
+    <context:component-scan base-package="com.max.exigo" />
+    <context:component-scan base-package="com.max.coaching" />
+
+</beans>
