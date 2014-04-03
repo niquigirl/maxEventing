@@ -5,7 +5,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -31,11 +30,11 @@ import javax.sql.DataSource;
         "classpath:/spring/max-jms.xml",
         "classpath:/spring/max-jpa.xml"
 })
-@TransactionConfiguration(transactionManager = "maxTransactionManager", defaultRollback = true)
+@TransactionConfiguration(transactionManager = "exigoTransactionManager", defaultRollback = true)
 @Transactional
-public abstract class BaseSpringInjectionUnitTest extends AbstractTransactionalJUnit4SpringContextTests
+public abstract class BaseExigoSpringInjectionUnitTest extends AbstractTransactionalJUnit4SpringContextTests
 {
-    @Resource(name = "maxDataSource")
+    @Resource(name = "exigoDataSource")
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }

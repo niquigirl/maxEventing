@@ -1,5 +1,6 @@
 package com.max.messaging.message;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
@@ -7,24 +8,31 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created by neastman on 3/21/14.
  */
 public class MaxMessage implements Serializable
 {
+    @JsonIgnore
     public static final String VERB = "verb";
+    @JsonIgnore
+    public static final Object ACTOR_OBJECT_TYPE = "actor.objectType";
+    @JsonIgnore
+    public static final Object ACTOR_ID = "actor.objectId";
+    @JsonIgnore
+    public static final Object SUBJECT_OBJECT_TYPE = "subject.objectType";
+    @JsonIgnore
+    public static final Object SUBJECT_ID = "subject.objectId";
+
     private String verb;
     private String language;
     private Date published;
     private String generator;
     private String provider;
-    private Map<String, String> displayName;
-    private Map<String, String> description;
+    private LanguageText displayName;
+    private LanguageText description;
     private Actor actor;
     private Subject subject;
     private Location location;
@@ -35,6 +43,7 @@ public class MaxMessage implements Serializable
 
     }
 
+    @JsonIgnore
     public static MaxMessage getInstance(String json) throws JSONException, IOException
     {
         ObjectMapper mapper = new ObjectMapper();
@@ -42,25 +51,6 @@ public class MaxMessage implements Serializable
         MaxMessage message = mapper.readValue(json, MaxMessage.class);
 
         return message;
-    }
-
-    public Properties getMetaProperties()
-    {
-        Properties metaProperties = new Properties();
-
-        if (getVerb() != null)
-            metaProperties.put(VERB, getVerb());
-
-        if (getActor() != null)
-        {
-            if (getActor().getObjectType() != null)
-                metaProperties.put("actor.objectType", getActor().getObjectType());
-
-            if (getActor().getId() != null)
-                metaProperties.put("actor.objectId", getActor().getId());
-        }
-
-        return metaProperties;
     }
 
     public String getVerb()
@@ -113,22 +103,22 @@ public class MaxMessage implements Serializable
         this.provider = provider;
     }
 
-    public Map<String, String> getDisplayName()
+    public LanguageText getDisplayName()
     {
         return displayName;
     }
 
-    public void setDisplayName(Map<String, String> displayName)
+    public void setDisplayName(LanguageText displayName)
     {
         this.displayName = displayName;
     }
 
-    public Map<String, String> getDescription()
+    public LanguageText getDescription()
     {
         return description;
     }
 
-    public void setDescription(Map<String, String> description)
+    public void setDescription(LanguageText description)
     {
         this.description = description;
     }
@@ -166,7 +156,7 @@ public class MaxMessage implements Serializable
     public static class Actor
     {
         private String objectType;
-        private String id;
+        private Integer id;
         private String displayName;
         private String customerType;
 
@@ -180,12 +170,12 @@ public class MaxMessage implements Serializable
             this.objectType = objectType;
         }
 
-        public String getId()
+        public Integer getId()
         {
             return id;
         }
 
-        public void setId(String id)
+        public void setId(Integer id)
         {
             this.id = id;
         }
@@ -211,6 +201,42 @@ public class MaxMessage implements Serializable
         }
     }
 
+    public static class Subject
+    {
+        private Integer id;
+        private String objectType;
+        private Map<String, String> metadata;
+
+        public Integer getId()
+        {
+            return id;
+        }
+
+        public void setId(Integer id)
+        {
+            this.id = id;
+        }
+
+        public String getObjectType()
+        {
+            return objectType;
+        }
+
+        public void setObjectType(String objectType)
+        {
+            this.objectType = objectType;
+        }
+
+        public Map<String, String> getMetadata()
+        {
+            return metadata;
+        }
+
+        public void setMetadata(Map<String, String> metadata)
+        {
+            this.metadata = metadata;
+        }
+    }
     public static class Location
     {
         private String latitude;
@@ -235,5 +261,59 @@ public class MaxMessage implements Serializable
         {
             this.longitude = longitude;
         }
+    }
+
+    public static class LanguageText
+    {
+        private String en;
+        private String fr;
+        private String sp;
+        private String tg;
+
+        public String getEn()
+        {
+            return en;
+        }
+
+        public void setEn(String en)
+        {
+            this.en = en;
+        }
+
+        public String getFr()
+        {
+            return fr;
+        }
+
+        public void setFr(String fr)
+        {
+            this.fr = fr;
+        }
+
+        public String getSp()
+        {
+            return sp;
+        }
+
+        public void setSp(String sp)
+        {
+            this.sp = sp;
+        }
+
+        public String getTg()
+        {
+            return tg;
+        }
+
+        public void setTg(String tg)
+        {
+            this.tg = tg;
+        }
+    }
+
+    @Override
+    public String toString()
+    {
+        return new JSONObject(this).toString();
     }
 }

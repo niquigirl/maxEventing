@@ -18,7 +18,7 @@ pubnub.subscribe({
 });
 
 function doOnReceive(message) {
-	messages.innerHTML = messages.innerHTML + "<br/>" + message.description["us"] + " : Actor type " + message.actor.objectType + " with ID " + message.actor.id;
+	messages.innerHTML = messages.innerHTML + "<br/>" + message.description.en + " : Actor type " + message.actor.objectType + " with ID " + message.actor.id;
 }
 /*
 pubnub.bind( 'change', input, function() {

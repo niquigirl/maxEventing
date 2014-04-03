@@ -8,7 +8,7 @@
         <property name="locations">
             <list>
                 <!-- For separation of configuration settings per environment, application.properties should be outside the generated
-                WAR, please don't check it in.
+                WAR, please don't check id in.
                 DO remember to reflect any property changes in the sample and check that in.
                 If you do move your application.properties and modify this config file to reflect that move, do NOT check this file -->
                 <value>file:/srv/appdata/maxeventing/application.properties</value>
@@ -21,5 +21,6 @@
     <context:component-scan base-package="com.max.web.services" />
     <context:component-scan base-package="com.max.exigo" />
     <context:component-scan base-package="com.max.coaching" />
+    <context:component-scan base-package="com.max.services" />
 
 </beans>

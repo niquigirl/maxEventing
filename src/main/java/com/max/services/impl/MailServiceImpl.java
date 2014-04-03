@@ -2,6 +2,7 @@ package com.max.services.impl;
 
 import com.max.services.MailService;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
 
 import javax.activation.DataHandler;
 import javax.mail.*;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
 
+@Service
 public class MailServiceImpl implements MailService
 {
     private Logger log = Logger.getLogger(MailServiceImpl.class);

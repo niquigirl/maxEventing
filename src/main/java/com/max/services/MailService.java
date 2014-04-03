@@ -1,5 +1,6 @@
 package com.max.services;
 
+import javax.mail.Service;
 import java.io.File;
 import java.io.IOException;
 

@@ -10,7 +10,7 @@ http://www.springframework.org/schema/data/jpa http://www.springframework.org/sc
 
 
     <jpa:repositories base-package="com.max.exigo" entity-manager-factory-ref="exigoEntityManagerFactory" transaction-manager-ref="exigoTransactionManager" />
-    <jpa:repositories base-package="com.max.coaching" entity-manager-factory-ref="maxEntityManagerFactory" transaction-manager-ref="maxTransactionManager" />
+    <jpa:repositories base-package="com.max.coaching.db" entity-manager-factory-ref="maxEntityManagerFactory" transaction-manager-ref="maxTransactionManager" />
 
     <tx:annotation-driven transaction-manager="exigoTransactionManager" />
     <tx:annotation-driven transaction-manager="maxTransactionManager" />
@@ -42,7 +42,7 @@ http://www.springframework.org/schema/data/jpa http://www.springframework.org/sc
         </property>
     </bean>
     <bean id="maxEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="packagesToScan" value="com.max.coaching"/>
+        <property name="packagesToScan" value="com.max.coaching.db"/>
         <property name="dataSource" ref="maxDataSource"/>
         <property name="persistenceUnitName" value="maxPersistenceUnit"/>
         <property name="jpaVendorAdapter">

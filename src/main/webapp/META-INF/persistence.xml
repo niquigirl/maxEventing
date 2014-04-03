@@ -7,7 +7,7 @@
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <properties>
             <property name="hibernate.show_sql" value="true"/>
-            <property name="connection.autocommit" value="true"/>
+            <property name="connection.autocommit" value="false"/>
         </properties>
     </persistence-unit>
 
