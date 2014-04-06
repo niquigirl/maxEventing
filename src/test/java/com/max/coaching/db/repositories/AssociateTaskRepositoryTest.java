@@ -37,7 +37,6 @@ public class AssociateTaskRepositoryTest extends BaseSpringInjectionUnitTest
 
         AssociateTask assTask = new AssociateTask();
         assTask.setAssociateId(1);
-        assTask.setActorId(1);
         assTask.setCreatedDate(new Date());
         assTask.setTask(savedTemplate);
 

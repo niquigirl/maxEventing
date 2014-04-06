@@ -15,7 +15,6 @@ public class AssociateTask extends CoachingMaxElement
     @JoinColumn(name = "taskTemplateId", referencedColumnName = "id")
     private TaskTemplate task;
     private Integer associateId;
-    private Integer actorId;
     private Integer subjectId;
     private String subjectObjectType;
     @Temporal(TemporalType.DATE)
@@ -76,16 +75,6 @@ public class AssociateTask extends CoachingMaxElement
     public void setIgnored(boolean ignored)
     {
         this.ignored = ignored;
-    }
-
-    public Integer getActorId()
-    {
-        return actorId;
-    }
-
-    public void setActorId(Integer actorId)
-    {
-        this.actorId = actorId;
     }
 
     public Integer getSubjectId()

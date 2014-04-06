@@ -8,12 +8,9 @@
     <!--
         MESSAGING SUBSCRIBERS
     -->
-    <bean name="taskSubscriber" class="com.max.messaging.subscribe.impl.TaskSubscriber" init-method="register" destroy-method="doFinalize">
-        <property name="topicSettings" ref="userActivityTopicSettings"/>
-        <property name="filterString" value="verb = 'NewAssociate' OR verb = 'TaskCompleted' OR verb = 'ProspectAdded' OR verb = 'ProspectContacted'"/>
-        <property name="subscriberName" value="TaskEngine"/>
+    <bean name="eventTaskMap" class="com.max.messaging.subscribe.impl.EventTaskMapping">
         <property name="eventTaskMap">
-            <map key-type="java.lang.String" value-type="java.lang.Runnable">
+            <map key-type="java.lang.String" value-type="java.lang.String">
                 <entry key="LoggedIn" value="LOG_IN"/>
                 <entry key="ProspectAdded" value="ADD_PROSPECT"/>
                 <entry key="ProspectContacted" value="CONTACT_PROSPECT"/>
@@ -23,6 +20,16 @@
                 <entry key="AutoShipAdded" value="CREATE_AUTOSHIP"/>
             </map>
         </property>
+    </bean>
+    <bean name="taskSubscriber" class="com.max.messaging.subscribe.impl.TaskSubscriber" init-method="register" destroy-method="doFinalize">
+        <property name="topicSettings" ref="userActivityTopicSettings"/>
+        <property name="filterString" value="verb = 'LoggedOn' OR verb = 'WhyPhotoUploaded' OR verb = 'NewAssociateSigned' OR verb = 'ProspectAdded' OR verb = 'ProspectContacted' OR verb = 'VideoWatched' OR verb = 'WhyAdded'"/>
+        <property name="subscriberName" value="AutoTaskFlowEngine"/>
+    </bean>
+    <bean name="autoTaskFlowSubscriber" class="com.max.messaging.subscribe.impl.AutoTaskFlowSubscriber" init-method="register" destroy-method="doFinalize">
+        <property name="topicSettings" ref="userActivityTopicSettings"/>
+        <property name="filterString" value="verb = 'NewAssociate' OR verb = 'TaskCompleted' OR verb = 'ProspectAdded' OR verb = 'ProspectContacted'"/>
+        <property name="subscriberName" value="TaskEngine"/>
     </bean>
     <bean name="notificationSubscriber" class="com.max.messaging.subscribe.impl.NotificationSubscriber" init-method="register" destroy-method="doFinalize">
         <property name="mailService" ref="mailService"/>

@@ -8,8 +8,7 @@ import com.max.coaching.db.repositories.TaskTemplateRepository;
 import com.max.messaging.message.MaxMessage;
 import org.junit.Test;
 
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -23,12 +22,16 @@ import static org.mockito.Mockito.*;
 public class TaskSubscriberMockTest extends BaseMockUnitTest
 {
 
+    /**
+     * Verify that if we have a subject in our message, that we add the subject as criteria for looking for existing tasks
+     *
+     * @throws Exception
+     */
     @Test
-    public void testGetAssociateTask() throws Exception
+    public void testGetAssociateTaskWSubject() throws Exception
     {
         TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
-        HashMap<String, String> eventTaskMap = createEventTaskMap();
-        when(taskSubscriber.getEventTaskMap()).thenReturn(eventTaskMap);
+        when(taskSubscriber.getEventTaskMapping()).thenReturn(createEventTaskMap());
         when(taskSubscriber.getAssociateTask(any(MaxMessage.class), anyString())).thenCallRealMethod();
 
         AssociateTaskRepository taskRepository = mock(AssociateTaskRepository.class);
@@ -54,8 +57,121 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         // verify
         verify(taskRepository).findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
         verify(taskRepository, never()).findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString());
+
+        System.out.println("Asserted existing Task are searched including subject data when Message includes subject data");
     }
 
+    /**
+     * Verify that if we don't have a subject in our message, that we don't add the subject as criteria for looking for existing tasks
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testGetAssociateTaskWOutSubject() throws Exception
+    {
+        TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
+        when(taskSubscriber.getEventTaskMapping()).thenReturn(createEventTaskMap());
+        when(taskSubscriber.getAssociateTask(any(MaxMessage.class), anyString())).thenCallRealMethod();
+
+        AssociateTaskRepository taskRepository = mock(AssociateTaskRepository.class);
+        when(taskSubscriber.getAssociateTaskRepository()).thenReturn(taskRepository);
+
+        MaxMessage message = new MaxMessage();
+        MaxMessage.Actor actor = new MaxMessage.Actor();
+        actor.setObjectType("Actor.ObjectType");
+        actor.setId(123);
+        message.setActor(actor);
+
+        message.setVerb("LoggedIn");
+
+        //
+        // Action!
+        taskSubscriber.getAssociateTask(message, "LOG_IN");
+
+        // verify
+        verify(taskRepository, never()).findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
+        verify(taskRepository).findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString());
+
+        System.out.println("Asserted existing Associate tasks are searched without subject data when Message has no subject");
+    }
+
+    /**
+     * Verify that if we find no existing tasks, that we create a new one
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testGetAssociateTaskWOutSubject_NoExistingTaskFound() throws Exception
+    {
+        TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
+        when(taskSubscriber.getEventTaskMapping()).thenReturn(createEventTaskMap());
+        when(taskSubscriber.getAssociateTask(any(MaxMessage.class), anyString())).thenCallRealMethod();
+
+        AssociateTaskRepository taskRepository = mock(AssociateTaskRepository.class);
+        when(taskSubscriber.getAssociateTaskRepository()).thenReturn(taskRepository);
+        when(taskRepository.findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString())).thenReturn(Collections.<AssociateTask>emptyList());
+
+        MaxMessage message = new MaxMessage();
+        MaxMessage.Actor actor = new MaxMessage.Actor();
+        actor.setObjectType("Actor.ObjectType");
+        actor.setId(123);
+        message.setActor(actor);
+
+        message.setVerb("LoggedIn");
+
+        //
+        // Action!
+        taskSubscriber.getAssociateTask(message, "LOG_IN");
+
+        // verify
+        verify(taskRepository, never()).findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
+        verify(taskRepository).findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString());
+        verify(taskSubscriber).createNewActivityRecord(any(MaxMessage.class), anyString());
+
+        System.out.println("Asserted that if no existing pending task is found for an associate and event, a new one will be created");
+    }
+
+    /**
+     * Verify that if we find existing tasks, that we don't create a new one
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testGetAssociateTaskWOutSubject_ExistingTaskFound() throws Exception
+    {
+        TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
+        when(taskSubscriber.getEventTaskMapping()).thenReturn(createEventTaskMap());
+        when(taskSubscriber.getAssociateTask(any(MaxMessage.class), anyString())).thenCallRealMethod();
+
+        AssociateTaskRepository taskRepository = mock(AssociateTaskRepository.class);
+        when(taskSubscriber.getAssociateTaskRepository()).thenReturn(taskRepository);
+        List<AssociateTask> existingTasks = new LinkedList<>();
+        existingTasks.add(new AssociateTask());
+        when(taskRepository.findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString())).thenReturn(existingTasks);
+
+        MaxMessage message = new MaxMessage();
+        MaxMessage.Actor actor = new MaxMessage.Actor();
+        actor.setObjectType("Actor.ObjectType");
+        actor.setId(123);
+        message.setActor(actor);
+
+        message.setVerb("LoggedIn");
+
+        //
+        // Action!
+        taskSubscriber.getAssociateTask(message, "LOG_IN");
+
+        // verify
+        verify(taskRepository, never()).findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
+        verify(taskRepository).findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString());
+        verify(taskSubscriber, never()).createNewActivityRecord(any(MaxMessage.class), anyString());
+
+        System.out.println("Asserted that the existing Associate Task is used if one is found pending for the associate/event in a message");
+    }
+
+    /**
+     * Verfify the functionality to populate completed data
+     */
     @Test
     public void testPopulateData()
     {
@@ -75,127 +191,51 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         assertThat(associateTask.getCompletedDate()).isInSameDayAs(new Date());
         assertThat(associateTask.getSubjectId()).isNotNull();
         assertThat(associateTask.getSubjectId()).isEqualTo(subject.getId());
-        assertThat(associateTask.getSubjectObjectType()).isNullOrEmpty();
+        assertThat(associateTask.getSubjectObjectType()).isEqualTo(subject.getObjectType());
+
+        System.out.println("Asserted all expected fields are set when populating completed data in an Associate Task");
     }
 
+    /**
+     * Verfify the functionality to create a new AssociateTask
+     */
     @Test
     public void testCreateNewActivityRecord()
     {
+        MaxMessage message = new MaxMessage();
+        MaxMessage.Actor actor = new MaxMessage.Actor();
+        actor.setId(123);
+        actor.setObjectType("associate");
+        message.setActor(actor);
+        MaxMessage.Subject subject = new MaxMessage.Subject();
+        subject.setId(555);
+        subject.setObjectType("subjectObject");
+        message.setSubject(subject);
+
         TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
         when(taskSubscriber.createNewActivityRecord(any(MaxMessage.class), anyString())).thenCallRealMethod();
 
+        TaskTemplate task = new TaskTemplate();
+        task.setId(333);
+
         TaskTemplateRepository taskTemplateRepository = mock(TaskTemplateRepository.class);
+        when(taskTemplateRepository.findByDescriptionKey(anyString())).thenReturn(task);
         when(taskSubscriber.getTaskTemplateRepository()).thenReturn(taskTemplateRepository);
-        when(taskTemplateRepository.findByDescriptionKey(anyString())).thenReturn(mock(TaskTemplate.class));
 
-//        verify()
-    /*
-        AssociateTask createNewActivityRecord(MaxMessage message, String taskName)
-    {
-        AssociateTask task = new AssociateTask();
-        TaskTemplate byDescriptionKey = taskTemplateRepository.findByDescriptionKey(taskName);
+        AssociateTask myTask = taskSubscriber.createNewActivityRecord(message, "MyTask");
+        assertThat(myTask.getCompletedDate()).isNull();
+        assertThat(myTask.getCreatedDate()).isInSameDayAs(new Date());
+        assertThat(myTask.getTask()).isNotNull();
+        assertThat(myTask.getTask().getId()).isEqualTo(333);
+        assertThat(myTask.getSubjectId()).isEqualTo(subject.getId());
+        assertThat(myTask.getSubjectObjectType()).isEqualTo(subject.getObjectType());
 
-        if (byDescriptionKey == null)
-        {
-            log.error("Could not find a TaskTemplate for " + taskName);
-            return null;
-        }
-
-        task.setTask(byDescriptionKey);
-        task.setAssociateId(message.getActor().getId());
-        task.setCreatedDate(new Date());
-        task.setCompletedDate(new Date());
-        task.setSubjectId(message.getSubject() != null ? message.getSubject().getId() : null);
-        task.setSubjectObjectType(message.getSubject() != null ? message.getSubject().getObjectType(): null);
-
-        return task;
+        System.out.println("Asserted that all expected fields are populated when creating an Associate Task from a message");
     }
 
-     */
-
-
-/*
-        activityRecord.setSubjectId(message.getSubject() != null ? message.getSubject().getId() : null);
-        activityRecord.setCompletedDate(new Date());
-        activityRecord.setSubjectObjectType(message.getSubject() != null ? message.getSubject().getObjectType() : null);
-
-
-
-
-        List<AssociateTask> incompleteExistingTasks = null;
-        if (message.getSubject() != null && message.getSubject().getId() != null)
-        {
-            incompleteExistingTasks =
-                    getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(message.getActor().getId(), taskDescriptionKey, message.getSubject().getId());
-        }
-        else
-        {
-            incompleteExistingTasks =
-                    getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(message.getActor().getId(), taskDescriptionKey);
-        }
-
-        AssociateTask activityRecord;
-        if (incompleteExistingTasks != null && !incompleteExistingTasks.isEmpty())
-            activityRecord = incompleteExistingTasks.get(0);
-        else
-            activityRecord = createNewActivityRecord(message, taskDescriptionKey);
-        return activityRecord;
-
- */
-
-
-
-        /*
-        doCallRealMethod().when(taskSubscriber).onMessage(any(MaxMessage.class));
-        AssociateTask associateTask = mock(AssociateTask.class);
-        when(taskSubscriber.getAssociateTask(any(MaxMessage.class), anyString())).thenReturn(associateTask);
-
-        MaxMessage message = new MaxMessage();
-        MaxMessage.Actor actor = new MaxMessage.Actor();
-        actor.setObjectType("Actor.ObjectType");
-        actor.setId(123);
-        message.setActor(actor);
-
-        MaxMessage.Subject subject = new MaxMessage.Subject();
-        subject.setObjectType("Subject.ObjectType");
-        subject.setId(444);
-        message.setSubject(subject);
-
-        message.setVerb("LoggedIn");
-
-        // Scene 1
-        taskSubscriber.onMessage(message);
-
-        verify(taskRepository).findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
-
-        /*
-        if (message.getSubject() != null && message.getSubject().getId() != null)
-        {
-            incompleteExistingTasks =
-                    associateTaskRepository.findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(message.getActor().getId(), taskDescriptionKey, message.getSubject().getId());
-        }
-        else
-        {
-            incompleteExistingTasks =
-                    associateTaskRepository.findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(message.getActor().getId(), taskDescriptionKey);
-        }
-
-        AssociateTask activityRecord;
-        if (incompleteExistingTasks != null && !incompleteExistingTasks.isEmpty())
-            activityRecord = incompleteExistingTasks.get(0);
-        else
-            activityRecord = createNewActivityRecord(message, taskDescriptionKey);
-
-        populateCompletedData(message, activityRecord);
-
-        associateTaskRepository.save(activityRecord);
-
-         */
-    }
-
-    private HashMap<String, String> createEventTaskMap()
+    private EventTaskMapping createEventTaskMap()
     {
-        HashMap<String, String> eventTaskMap = new HashMap<String, String>();
+        HashMap<String, String> eventTaskMap = new HashMap<>();
         eventTaskMap.put("LoggedIn", "LOG_IN");
         eventTaskMap.put("ProspectAdded", "ADD_PROSPECT");
         eventTaskMap.put("ProspectContacted", "CONTACT_PROSPECT");
@@ -203,11 +243,9 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         eventTaskMap.put("WhyAdded", "ADD_WHY");
         eventTaskMap.put("WhyPhotoUploaded", "UPLOAD_WHY_PHOTO");
         eventTaskMap.put("AutoShipAdded", "CREATE_AUTOSHIP");
-        return eventTaskMap;
-    }
 
-    public void testTaskShouldBeSpun() throws Exception
-    {
-        // todo
+        EventTaskMapping mapping = new EventTaskMapping();
+        mapping.setEventTaskMap(eventTaskMap);
+        return mapping;
     }
 }
