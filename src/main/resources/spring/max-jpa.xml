@@ -16,14 +16,15 @@ http://www.springframework.org/schema/data/jpa http://www.springframework.org/sc
     <tx:annotation-driven transaction-manager="maxTransactionManager" />
 
     <bean id="exigoDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+        <property name="driverClassName" value="net.sourceforge.jtds.jdbc.Driver" />
         <property name="url" value="${db.maxreporting.url}" />
         <property name="username" value="${db.maxreporting.username}" />
         <property name="password" value="${db.maxreporting.password}" />
     </bean>
 
     <bean id="maxDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+        <!--<property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />-->
+        <property name="driverClassName" value="net.sourceforge.jtds.jdbc.Driver" />
         <property name="url" value="${db.max.url}" />
         <property name="username" value="${db.max.username}" />
         <property name="password" value="${db.max.password}" />

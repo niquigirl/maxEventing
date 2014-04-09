@@ -23,15 +23,6 @@
                 json.subject.id=$("#subjectId").attr("value");
                 json.subject.objectType=$("#subjectObjectType").attr("value");
                  console.log(JSON.stringify(json));
-/*
-                var data = [];
-                data.push('{"verb":"' + $("#verb").attr("value") + '", ');
-                data.push('"actor": {"id":"' + $("#actorId").attr("value") + '", "objectType":"' + $("#actorObjectType").attr("value") + '"}, ');
-                data.push('"subject": {"id":"' + $("#subjectId").attr("value") + '", "objectType":"' + $("#subjectObjectType").attr("value") + '"}');
-                data.push('}');
-                var dataString = data.join('');
-                console.log(dataString);
-*/
 
                 $.ajax({
                     'headers': {

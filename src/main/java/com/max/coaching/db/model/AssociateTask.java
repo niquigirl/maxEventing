@@ -11,7 +11,7 @@ import java.util.Date;
 @Table(name = "AssociateTask")
 public class AssociateTask extends CoachingMaxElement
 {
-    @OneToOne(fetch=FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "taskTemplateId", referencedColumnName = "id")
     private TaskTemplate task;
     private Integer associateId;
@@ -25,7 +25,7 @@ public class AssociateTask extends CoachingMaxElement
     private Date dueDate;
     @Basic
     @Column(name = "ignored", columnDefinition = "BIT", length = 1)
-    private boolean ignored;
+    private Boolean ignored = false;
 
     public TaskTemplate getTask()
     {
@@ -67,12 +67,12 @@ public class AssociateTask extends CoachingMaxElement
         this.dueDate = dueDate;
     }
 
-    public boolean isIgnored()
+    public Boolean isIgnored()
     {
         return ignored;
     }
 
-    public void setIgnored(boolean ignored)
+    public void setIgnored(Boolean ignored)
     {
         this.ignored = ignored;
     }
