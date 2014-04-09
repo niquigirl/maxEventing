@@ -1,0 +1,37 @@
+<html>
+<body>
+<div id="messages">Waiting for messages...</div>
+
+<script src=http://cdn.pubnub.com/pubnub.min.js></script>
+<script>(function() {
+
+var input = PUBNUB.$('input');
+var messages =  PUBNUB.$('messages');
+var pubnub = PUBNUB.init({
+publish_key: 'pub-c-02723478-99a6-4f63-9d74-f82e11034f59',
+subscribe_key: 'sub-c-cd455cbc-a4c2-11e3-a0b1-02ee2ddab7fe'
+});
+
+pubnub.subscribe({
+	channel : 'root',
+	message : doOnReceive
+});
+
+function doOnReceive(message) {
+	messages.innerHTML = messages.innerHTML + "<br/>" + message.webMessage;
+}
+/*
+pubnub.bind( 'change', input, function() {
+	pubnub.publish({
+		channel : 'button-click',
+		message : input.value
+	});
+	input.select();
+	input.focus();
+
+});
+*/
+
+})(); </script>
+</body>
+</html>
