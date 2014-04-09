@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Created by neastman on 3/21/14.
+ * POJO Defining the JSON structure of a Message
  */
 public class MaxMessage implements Serializable
 {
@@ -27,14 +27,12 @@ public class MaxMessage implements Serializable
     public static final Object SUBJECT_ID = "subject.objectId";
 
     private String verb;
-    private String language;
+    private String language = "en";
     private Date published;
     private String generator;
     private String provider;
-    private LanguageText displayName;
-    private LanguageText description;
-    private Actor actor;
-    private Subject subject;
+    public Actor actor;
+    public Subject subject;
     private Location location;
 
     public MaxMessage()
@@ -48,9 +46,8 @@ public class MaxMessage implements Serializable
     {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);
-        MaxMessage message = mapper.readValue(json, MaxMessage.class);
 
-        return message;
+        return mapper.readValue(json, MaxMessage.class);
     }
 
     public String getVerb()
@@ -103,28 +100,10 @@ public class MaxMessage implements Serializable
         this.provider = provider;
     }
 
-    public LanguageText getDisplayName()
-    {
-        return displayName;
-    }
-
-    public void setDisplayName(LanguageText displayName)
-    {
-        this.displayName = displayName;
-    }
-
-    public LanguageText getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription(LanguageText description)
-    {
-        this.description = description;
-    }
-
     public Actor getActor()
     {
+        if (actor == null)
+            actor = new Actor();
         return actor;
     }
 
@@ -156,7 +135,7 @@ public class MaxMessage implements Serializable
     public static class Actor
     {
         private String objectType;
-        private Integer id;
+        public Integer id;
         private String displayName;
         private String customerType;
 
@@ -263,53 +242,6 @@ public class MaxMessage implements Serializable
         }
     }
 
-    public static class LanguageText
-    {
-        private String en;
-        private String fr;
-        private String sp;
-        private String tg;
-
-        public String getEn()
-        {
-            return en;
-        }
-
-        public void setEn(String en)
-        {
-            this.en = en;
-        }
-
-        public String getFr()
-        {
-            return fr;
-        }
-
-        public void setFr(String fr)
-        {
-            this.fr = fr;
-        }
-
-        public String getSp()
-        {
-            return sp;
-        }
-
-        public void setSp(String sp)
-        {
-            this.sp = sp;
-        }
-
-        public String getTg()
-        {
-            return tg;
-        }
-
-        public void setTg(String tg)
-        {
-            this.tg = tg;
-        }
-    }
 
     @Override
     public String toString()

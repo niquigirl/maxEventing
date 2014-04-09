@@ -36,4 +36,27 @@ public class MaxMessageTest
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void validateSimpleUnmarshal_knownFail()
+    {
+        String myJson = "{\"verb\":\"LoggedIn\", \"actor\": {\"id\":\"513683\", \"objectType\":\"undefined\"}, \"subject\": {\"id\":\"\", \"objectType\":\"undefined\"}}";
+
+        try
+        {
+            MaxMessage result = MaxMessage.getInstance(myJson);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getVerb()).isEqualTo("LoggedIn");
+            assertThat(result.getLanguage()).isEqualTo("en");
+            assertThat(result.getActor()).isNotNull();
+            assertThat(result.getActor().getId()).isEqualTo(513683);
+
+            System.out.println("Asserted super basic things about unmarshalling a MaxMessage from JSON");
+        }
+        catch (JSONException | IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 }

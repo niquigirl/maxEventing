@@ -1,7 +1,6 @@
 package com.max.exigo;
 
 import com.max.BaseExigoSpringInjectionUnitTest;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -10,7 +9,6 @@ import static org.fest.assertions.api.Assertions.assertThat;
 /**
  * Verify CustomerDao stuff
  */
-@Ignore
 public class CustomerDaoTest extends BaseExigoSpringInjectionUnitTest
 {
     @Autowired

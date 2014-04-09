@@ -53,7 +53,7 @@ public abstract class DurableTopicSubscriber implements MessageListener
     @Override
     public void onMessage(Message message)
     {
-        System.out.println("Starting onMessage " + Thread.currentThread().getId());
+        System.out.println("Starting onMessage " + this);
         try
         {
             String messageText = ((JMSTextMessage) message).getText();

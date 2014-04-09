@@ -16,14 +16,14 @@ http://www.springframework.org/schema/data/jpa http://www.springframework.org/sc
     <tx:annotation-driven transaction-manager="maxTransactionManager" />
 
     <bean id="exigoDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="${db.maxreporting.url}" />
         <property name="username" value="${db.maxreporting.username}" />
         <property name="password" value="${db.maxreporting.password}" />
     </bean>
 
     <bean id="maxDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="${db.max.url}" />
         <property name="username" value="${db.max.username}" />
         <property name="password" value="${db.max.password}" />
@@ -32,7 +32,7 @@ http://www.springframework.org/schema/data/jpa http://www.springframework.org/sc
     <bean id="exigoEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="packagesToScan" value="com.max.exigo"/>
         <property name="dataSource" ref="exigoDataSource"/>
-        <property name="persistenceUnitName" value="exigoPersistenceUnit"/>
+        <property name="persistenceUnitName" value="maxReportingPersistenceUnit"/>
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
                 <property name="showSql" value="false" />

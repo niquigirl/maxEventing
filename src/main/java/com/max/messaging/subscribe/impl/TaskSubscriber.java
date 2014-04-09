@@ -36,6 +36,7 @@ public class TaskSubscriber extends DurableTopicSubscriber
     @Override
     public void onMessage(MaxMessage message)
     {
+        System.out.println("Starting TaskSubscriber onMessage");
         String taskDescriptionKey = getEventTaskMapping().getTaskName(message.getVerb());
         if (taskDescriptionKey == null)
         {

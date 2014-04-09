@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript"
+            src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+
+    <script type="text/javascript">
+        jQuery(function ($) {
+
+            $("#testForm").submit(function (e) {
+                e.preventDefault();
+
+                console.log("Submitting form to " + $(this).attr("action"));
+
+                var data = [];
+                data.push('{"verb":"' + $("#verb").attr("value") + '", ');
+                data.push('"actor": {"id":"' + $("#actorId").attr("value") + '", "objectType":"' + $("#actorObjectType").attr("value") + '"}, ');
+                data.push('"subject": {"id":"' + $("#subjectId").attr("value") + '", "objectType":"' + $("#subjectObjectType").attr("value") + '"}');
+                data.push('}');
+
+                var jsonString = data.join('');
+                console.log(jsonString);
+                alert("Got data: " + jsonString);
+                $.ajax({
+                    url: $(this).attr("action"),
+                    data: jsonString,
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function (data) {
+                        $("#output").html("Deed, done");
+                        console.log("deed, done");
+                    },
+                    error: function (data) {
+                        $("#output").html("Deed, fail");
+                        console.log("Something went wrong" + data);
+                    }
+                });
+            });
+        });
+
+    </script>
+</head>
+<body>
+
+
+<form id="testForm" action="/maxeventing/publish">
+    <label title="Verb" for="verb">Verb</label>
+    <select name="verb" id="verb">
+        <option value="">-- Select --</option>
+        <option value="LoggedIn">Logged In</option>
+        <option value="CoachStarted">Coach Started</option>
+        <option value="AssociateSignedUp">New Associate Signed Up</option>
+        <option value="ProspectAdded">Prospect Added</option>
+        <option value="ProspectContacted">Prospect Contacted</option>
+        <option value="VideoWatched">Video Watched</option>
+        <option value="WhyAdded">Why Added</option>
+        <option value="WhyPhotoUploaded">Why Photo Uploaded</option>
+        <option value="AutoShipAdded">Auto Ship Added</option>
+    </select><br/>
+
+    <label title="Actor ID" for="actorId">Actor ID</label>
+    <input type="text" name="actorId" id="actorId"/><br/>
+
+    <label title="Subject ID" for="subjectId">Subject ID</label>
+    <input type="text" name="subjectId" id="subjectId"/><br/>
+
+    <label title="Subject Type" for="subjectType">Subject Type</label>
+    <select name="subjectType" id="subjectType">
+        <option value="">-- Select --</option>
+        <option value="PROSPECT">Prospect</option>
+        <option value="ASSOCIATE">Associate</option>
+    </select><br/>
+
+    <button value="Submit" name="Submit">Submit</button>
+</form>
+<div id="output" name="output"></div>
+
+
+</body>
+</html>

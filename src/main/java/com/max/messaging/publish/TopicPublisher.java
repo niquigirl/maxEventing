@@ -44,10 +44,10 @@ public class TopicPublisher
         log.debug("Request to sendMessage by String: " + message);
 
         MaxMessage msgObject = MaxMessage.getInstance(message);
-        sendMessages(topicName, msgObject);
+        sendMessage(topicName, msgObject);
     }
 
-    public void sendMessages(String topicName, MaxMessage msgObject) throws NamingException, JMSException
+    public void sendMessage(String topicName, MaxMessage msgObject) throws NamingException, JMSException
     {
         log.debug("Request to sendMessage by MaxMessage: " + msgObject.toString());
 

@@ -11,7 +11,7 @@ import java.util.List;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
- * Created by neastman on 3/28/14.
+ * Validate AutoTaskFlowRepository functions
  */
 public class AutoTaskFlowRepositoryTest extends BaseSpringInjectionUnitTest
 {
@@ -36,20 +36,20 @@ public class AutoTaskFlowRepositoryTest extends BaseSpringInjectionUnitTest
         newFlow.setAssigneeType(AutoTaskFlow.ASSIGNEE_TYPE.ASSOCIATE);
         newFlow.setAutoDueDateNumDays(5);
         newFlow.setCanRepeat(true);
-        newFlow.setEventName("SomeEvent");
+        newFlow.setTriggerTask(task);
         newFlow.setDependentTask(task);
         newFlow.setTaskToSpin(task);
 
-        atfRepository.save(newFlow);
+        System.out.println(atfRepository.save(newFlow));
     }
 
     @Test
     public void testFindByEventName() throws Exception
     {
-        List<AutoTaskFlow> events = atfRepository.findByEventName("SomeEvent");
+        List<AutoTaskFlow> events = atfRepository.findByTriggerTaskDescriptionKey("DESC_KEY");
 
         assertThat(events).isNotEmpty();
 
-        System.out.println("Found my AutoTaskFlow by event name " + events.size());
+        System.out.println("Asserted we can retrieve AutTaskFlow by trigger task: " + events.get(0).getTriggerTask().getDescriptionKey());
     }
 }

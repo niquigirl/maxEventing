@@ -5,8 +5,7 @@ import com.max.messaging.publish.TopicPublisher;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
@@ -30,18 +29,28 @@ public class TopicPublisherService
     // Now, for the intentions of THIS servlet
     //
 
+    @RequestMapping(value = "test", method=RequestMethod.GET)
+    public @ResponseBody String test()
+    {
+        log.debug("Just hit the Test service!");
+        return "Just hit the Test service!";
+    }
+
     @RequestMapping(value = "publish", method = RequestMethod.POST)
-    public void publish(MaxMessage message) throws ServletException, IOException
+    public @ResponseBody String publish(@RequestBody MaxMessage message) throws ServletException, IOException
     {
         log.debug("Servicing request to publish a message!!  :  " + message);
 
         try
         {
-            userActivityTopicPublisher.sendMessages(userActivityTopicPublisher.getTopicSettings().getTopicName(), message); // TODO
+            userActivityTopicPublisher.sendMessage(userActivityTopicPublisher.getTopicSettings().getTopicName(), message); // TODO
+
+            return "Message was published";
         }
         catch (NamingException | JMSException e)
         {
             e.printStackTrace();
+            return e.getMessage();
         }
     }
 

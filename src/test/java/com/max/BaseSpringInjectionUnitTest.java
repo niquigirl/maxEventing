@@ -29,6 +29,7 @@ import javax.sql.DataSource;
         "classpath:/spring/max-mvc.xml",
         "classpath:/spring/max-services.xml",
         "classpath:/spring/max-jms.xml",
+        "classpath:/spring/max-jms-subscribers.xml",
         "classpath:/spring/max-jpa.xml"
 })
 @TransactionConfiguration(transactionManager = "maxTransactionManager", defaultRollback = true)

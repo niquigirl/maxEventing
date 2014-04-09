@@ -11,27 +11,34 @@ import javax.persistence.*;
 public class AutoTaskFlow extends CoachingMaxElement
 {
     @OneToOne(fetch=FetchType.EAGER)
-    @JoinColumn(name = "taskTemplateId", referencedColumnName = "id")
+    @JoinColumn(name = "resultTaskTemplateId", referencedColumnName = "id")
     private TaskTemplate taskToSpin;
-    private String eventName;
-    @OneToOne(fetch=FetchType.EAGER)
+
+    @OneToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "triggerTaskTemplateId", referencedColumnName = "id")
+    private TaskTemplate triggerTask;
+
+    @OneToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "dependentTaskTemplateId", referencedColumnName = "id")
     private TaskTemplate dependentTask;
+
     private Integer numberToComplete;
     private Integer autoDueDateNumDays;
+    @Enumerated(EnumType.STRING)
     private ASSIGNEE_TYPE assigneeType;
+    @Enumerated(EnumType.STRING)
     private SUBJECT_TYPE subjectType;
     private Integer minRepeatDelayNumDays;
     @Basic
     @Column(name = "canRepeat", columnDefinition = "BIT", length = 1)
     private boolean canRepeat;
 
-    public enum ASSIGNEE_TYPE
+    public static enum ASSIGNEE_TYPE
     {
-        ASSOCIATE, UPLINE_BRONZE, SPONSOR, UPLINE_GOLD, ENROLLER
+        ASSOCIATE, ENROLLER, SPONSOR, UPLINE_BRONZE, UPLINE_SILVER, UPLINE_GOLD
     }
 
-    public enum SUBJECT_TYPE
+    public static enum SUBJECT_TYPE
     {
         ASSOCIATE, PROSPECT, VIDEO
     }
@@ -46,14 +53,14 @@ public class AutoTaskFlow extends CoachingMaxElement
         this.taskToSpin = taskToSpin;
     }
 
-    public String getEventName()
+    public TaskTemplate getTriggerTask()
     {
-        return eventName;
+        return triggerTask;
     }
 
-    public void setEventName(String eventName)
+    public void setTriggerTask(TaskTemplate triggerTask)
     {
-        this.eventName = eventName;
+        this.triggerTask = triggerTask;
     }
 
     public TaskTemplate getDependentTask()
