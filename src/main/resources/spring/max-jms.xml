@@ -15,6 +15,7 @@
                 <entry key="CoachStarted" value="START_COACH"/>
                 <entry key="ProspectAdded" value="ADD_PROSPECT"/>
                 <entry key="ProspectContacted" value="CONTACT_PROSPECT"/>
+                <entry key="AssociateContacted" value="CONTACT_ASSOCIATE"/>
                 <entry key="VideoWatched" value="WATCH_VIDEO"/>
                 <entry key="WhyAdded" value="ENTER_YOUR_WHY"/>
                 <entry key="WhyPhotoUploaded" value="UPLOAD_WHY_PHOTO"/>
