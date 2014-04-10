@@ -17,6 +17,7 @@ public class AssociateTaskBean implements DataModelBean<AssociateTask>
     public String subjectObjectType;
     public Date completedDate;
     public Date createdDate;
+    public Date dueDate;
     public boolean ignored;
 
     public AssociateTaskBean()
@@ -44,6 +45,7 @@ public class AssociateTaskBean implements DataModelBean<AssociateTask>
         completedDate = data.getCompletedDate();
         createdDate = data.getCreatedDate();
         ignored = data.isIgnored() == null ? false : data.isIgnored();
+        dueDate = data.getDueDate();
         
         return true;
     }
