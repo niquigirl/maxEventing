@@ -6,7 +6,7 @@
 
     <bean name="taskSubscriber" class="com.max.messaging.subscribe.impl.TaskSubscriber" init-method="register" destroy-method="doFinalize">
         <property name="topicSettings" ref="userActivityTopicSettings"/>
-        <property name="filterString" value="verb = 'LoggedIn' OR verb = 'CoachStarted' OR verb = 'WhyPhotoUploaded' OR verb = 'AssociateSignedUp' OR verb = 'ProspectAdded' OR verb = 'ProspectContacted' OR verb = 'VideoWatched' OR verb = 'WhyAdded' OR verb = 'AutoShipAdded'"/>
+        <!--<property name="filterString" value="verb = 'LoggedIn' OR verb = 'CoachStarted' OR verb = 'WhyPhotoUploaded' OR verb = 'AssociateSignedUp' OR verb = 'ProspectAdded' OR verb = 'ProspectContacted' OR verb = 'AssociateContacted' OR verb = 'VideoWatched' OR verb = 'WhyAdded' OR verb = 'AutoShipAdded'"/>-->
         <property name="subscriberName" value="AutoTaskFlowEngine"/>
     </bean>
     <bean name="autoTaskFlowSubscriber" class="com.max.messaging.subscribe.impl.AutoTaskFlowSubscriber" init-method="register" destroy-method="doFinalize">
