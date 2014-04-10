@@ -66,11 +66,39 @@ public class TaskService extends MaxWebService
         return results;
     }
 
+
+    @SuppressWarnings("unused")
+    @RequestMapping(value = "{version}/{lang}/{country}/getAllAssociateTasks", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    MaxDataResults<AssociateTaskBean> getAllAssociateTasks(@PathVariable("version") String version, @PathVariable("lang") String lang, @PathVariable("country") String country,
+                                                           @RequestParam(required = false) Boolean completed)
+            throws ServletException, IOException
+    {
+        MaxDataResults<AssociateTaskBean> results = new MaxDataResults<>("getAllAssociateTasks");
+        results.addRequestParam("completed", completed);
+
+        List<AssociateTask> associateTasks;
+
+        if (completed == null)
+        {
+            associateTasks = repository.findAll();
+        }
+        else if (completed)
+            associateTasks = repository.findByCompletedDateIsNotNull();
+        else
+            associateTasks = repository.findByCompletedDateIsNull();
+
+        results.setData(convertToAssociateTaskBean(associateTasks, lang));
+
+        return results;
+    }
+
     /**
      * Create a List of UI/WS Beans from a list of DB objects
      *
      * @param associateTasks {@code List&lt;AssociateTask&gt;}
-     * @param lang {@code String}
+     * @param lang           {@code String}
      * @return {@code List&lt;AssociateTaskBean&gt;}
      */
     private List<AssociateTaskBean> convertToAssociateTaskBean(List<AssociateTask> associateTasks, String lang)

@@ -119,6 +119,8 @@ public class MaxMessage implements Serializable
 
     public Subject getSubject()
     {
+        if (subject == null)
+            subject = new Subject();
         return subject;
     }
 
