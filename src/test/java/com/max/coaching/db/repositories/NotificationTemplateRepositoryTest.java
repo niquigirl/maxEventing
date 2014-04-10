@@ -7,6 +7,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 
+import java.util.List;
+
 import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
@@ -39,6 +41,16 @@ public class NotificationTemplateRepositoryTest extends BaseSpringInjectionUnitT
 
         assertThat(found).isNotNull();
         System.out.println("Asserted we could find notification template set up in setUp: " + found.getId());
+
+    }
+
+    @Test
+    public void testFindByEventName()
+    {
+        List<NotificationTemplate> notificationTemplates = notificationTemplateRepository.findByEventName("AssociateSignedUp");
+
+        assertThat(notificationTemplates).isNotEmpty();
+        System.out.println("Asserted we could find notification template by event name: " + notificationTemplates.size());
 
     }
 }

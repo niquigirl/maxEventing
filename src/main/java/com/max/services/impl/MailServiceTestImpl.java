@@ -32,7 +32,7 @@ public class MailServiceTestImpl implements MailService
     @Override
     public void sendMail(String to, String subject, String body) throws IOException
     {
-        System.out.println("Email being delivered. Subject: " + subject + " : : : Body: " + body);
+        System.out.println("--------> Email being delivered. Subject: " + subject + " : : : Body: " + body);
     }
 
     @Override

@@ -37,8 +37,7 @@ public class MaxMessage implements Serializable
 
     public MaxMessage()
     {
-        System.out.println("In MaxMessage constructor");
-
+        super();
     }
 
     @JsonIgnore
@@ -70,31 +69,37 @@ public class MaxMessage implements Serializable
         this.language = language;
     }
 
+    @SuppressWarnings("unused")
     public Date getPublished()
     {
         return published;
     }
 
+    @SuppressWarnings("unused")
     public void setPublished(Date published)
     {
         this.published = published;
     }
 
+    @SuppressWarnings("unused")
     public String getGenerator()
     {
         return generator;
     }
 
+    @SuppressWarnings("unused")
     public void setGenerator(String generator)
     {
         this.generator = generator;
     }
 
+    @SuppressWarnings("unused")
     public String getProvider()
     {
         return provider;
     }
 
+    @SuppressWarnings("unused")
     public void setProvider(String provider)
     {
         this.provider = provider;
@@ -122,11 +127,13 @@ public class MaxMessage implements Serializable
         this.subject = subject;
     }
 
+    @SuppressWarnings("unused")
     public Location getLocation()
     {
         return location;
     }
 
+    @SuppressWarnings("unused")
     public void setLocation(Location location)
     {
         this.location = location;
@@ -159,6 +166,7 @@ public class MaxMessage implements Serializable
             this.id = id;
         }
 
+        @SuppressWarnings("unused")
         public String getDisplayName()
         {
             return displayName;
@@ -169,11 +177,13 @@ public class MaxMessage implements Serializable
             this.displayName = displayName;
         }
 
+        @SuppressWarnings("unused")
         public String getCustomerType()
         {
             return customerType;
         }
 
+        @SuppressWarnings("unused")
         public void setCustomerType(String customerType)
         {
             this.customerType = customerType;
@@ -206,11 +216,13 @@ public class MaxMessage implements Serializable
             this.objectType = objectType;
         }
 
+        @SuppressWarnings("unused")
         public Map<String, String> getMetadata()
         {
             return metadata;
         }
 
+        @SuppressWarnings("unused")
         public void setMetadata(Map<String, String> metadata)
         {
             this.metadata = metadata;
@@ -221,21 +233,25 @@ public class MaxMessage implements Serializable
         private String latitude;
         private String longitude;
 
+        @SuppressWarnings("unused")
         public String getLatitude()
         {
             return latitude;
         }
 
+        @SuppressWarnings("unused")
         public void setLatitude(String latitude)
         {
             this.latitude = latitude;
         }
 
+        @SuppressWarnings("unused")
         public String getLongitude()
         {
             return longitude;
         }
 
+        @SuppressWarnings("unused")
         public void setLongitude(String longitude)
         {
             this.longitude = longitude;

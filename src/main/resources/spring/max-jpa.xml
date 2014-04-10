@@ -12,6 +12,7 @@ http://www.springframework.org/schema/data/jpa http://www.springframework.org/sc
     <jpa:repositories base-package="com.max.exigo" entity-manager-factory-ref="exigoEntityManagerFactory" transaction-manager-ref="exigoTransactionManager" />
     <jpa:repositories base-package="com.max.coaching.db" entity-manager-factory-ref="maxEntityManagerFactory" transaction-manager-ref="maxTransactionManager" />
 
+    <!-- TODO: I know this worked without defining the exigoTransactionManager, will it work with it? -->
     <tx:annotation-driven transaction-manager="exigoTransactionManager" />
     <tx:annotation-driven transaction-manager="maxTransactionManager" />
 
@@ -64,4 +65,7 @@ http://www.springframework.org/schema/data/jpa http://www.springframework.org/sc
         <property name="entityManagerFactory" ref="maxEntityManagerFactory" />
     </bean>
 
+    <bean name="customerDao" class="com.max.exigo.CustomerDao">
+        <property name="exigoDataSource" ref="exigoDataSource"/>
+    </bean>
 </beans>

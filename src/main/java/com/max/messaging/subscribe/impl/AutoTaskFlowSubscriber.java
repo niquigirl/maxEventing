@@ -2,6 +2,7 @@ package com.max.messaging.subscribe.impl;
 
 import com.max.coaching.db.model.AssociateTask;
 import com.max.coaching.db.model.AutoTaskFlow;
+import com.max.coaching.db.model.TaskTemplate;
 import com.max.coaching.db.repositories.AssociateTaskRepository;
 import com.max.coaching.db.repositories.AutoTaskFlowRepository;
 import com.max.coaching.db.repositories.TaskTemplateRepository;
@@ -38,6 +39,7 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
     EventTaskMapping eventTaskMapping;
 
     @Override
+    @Transactional
     public void onMessage(MaxMessage message)
     {
         System.out.println("Starting AutoTaskFlowSubscriber onMessage " + this);
@@ -48,20 +50,26 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
         }
 
         String taskDescriptionKey = eventTaskMapping.getTaskName(message.getVerb());
-        List<AutoTaskFlow> taskFlows = autoTaskFlowRepository.findByTriggerTaskDescriptionKey(taskDescriptionKey);
 
+        List<AssociateTask> tasksToPersist = new LinkedList<>();
+
+        List<AutoTaskFlow> taskFlows = autoTaskFlowRepository.findByTriggerTaskDescriptionKey(taskDescriptionKey);
         for (AutoTaskFlow curFlow : taskFlows)
         {
+            TaskTemplate dependentTask = curFlow.getDependentTask();
+            log.info("Auto task flow found with a dependency on " + (dependentTask == null ? "nothing" : dependentTask.getId()));
+
             try
             {
                 Integer assigneeId = getRelatedAssociateId(message.getActor().getId(), curFlow.getAssigneeType());
+                log.debug("Assign task " + curFlow.getTaskToSpin() + " to Associate " + assigneeId);
 
                 if (assigneeId != null)
                 {
                     if (taskShouldBeSpun(curFlow, assigneeId, message.getSubject() != null ? message.getSubject().getId() : null))
                     {
                         AssociateTask associateTask = createNewTask(curFlow, message, assigneeId);
-                        getAssociateTaskRepository().save(associateTask);
+                        tasksToPersist.add(associateTask);
                     }
                 }
                 else
@@ -74,6 +82,12 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
                 log.error("An error occurred trying to get the related associate for the following message: " + message + " for AutoTaskFlow " + curFlow);
             }
         }
+
+        // Persist newly created AssociateTasks
+        if (!tasksToPersist.isEmpty())
+        {
+            associateTaskRepository.save(tasksToPersist);
+        }
     }
 
     /**
@@ -84,7 +98,7 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
      * @param assigneeId {@code Integer} ID of the associate to which to assign this task
      * @return {@code AssociateTask}
      */
-    AssociateTask  createNewTask(AutoTaskFlow curFlow, MaxMessage message, Integer assigneeId)
+    AssociateTask createNewTask(AutoTaskFlow curFlow, MaxMessage message, Integer assigneeId)
     {
         AssociateTask task = new AssociateTask();
         task.setTask(curFlow.getTaskToSpin());
@@ -164,9 +178,9 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
             List<AssociateTask> preExistingAssocTasks;
 
             if (subjectId == null)
-                preExistingAssocTasks = getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKey(assigneeId, curFlow.getTaskToSpin().getDescriptionKey());
+                preExistingAssocTasks = associateTaskRepository.findByAssociateIdAndTaskDescriptionKey(assigneeId, curFlow.getTaskToSpin().getDescriptionKey());
             else
-                preExistingAssocTasks = getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKeyAndSubjectId(assigneeId, curFlow.getTaskToSpin().getDescriptionKey(), subjectId);
+                preExistingAssocTasks = associateTaskRepository.findByAssociateIdAndTaskDescriptionKeyAndSubjectId(assigneeId, curFlow.getTaskToSpin().getDescriptionKey(), subjectId);
 
             if (!preExistingAssocTasks.isEmpty())
                 return false;
@@ -177,9 +191,9 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
             List<AssociateTask> preExistingAssocTasks;
 
             if (subjectId == null)
-                preExistingAssocTasks = getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNotNull(assigneeId, curFlow.getDependentTask().getDescriptionKey());
+                preExistingAssocTasks = associateTaskRepository.findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNotNull(assigneeId, curFlow.getDependentTask().getDescriptionKey());
             else
-                preExistingAssocTasks = getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNotNull(assigneeId, curFlow.getDependentTask().getDescriptionKey(), subjectId);
+                preExistingAssocTasks = associateTaskRepository.findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNotNull(assigneeId, curFlow.getDependentTask().getDescriptionKey(), subjectId);
 
             if (preExistingAssocTasks.isEmpty())
                 return false;

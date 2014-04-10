@@ -16,7 +16,7 @@
                 <entry key="ProspectAdded" value="ADD_PROSPECT"/>
                 <entry key="ProspectContacted" value="CONTACT_PROSPECT"/>
                 <entry key="VideoWatched" value="WATCH_VIDEO"/>
-                <entry key="WhyAdded" value="ADD_WHY"/>
+                <entry key="WhyAdded" value="ENTER_YOUR_WHY"/>
                 <entry key="WhyPhotoUploaded" value="UPLOAD_WHY_PHOTO"/>
                 <entry key="AutoShipAdded" value="CREATE_AUTOSHIP"/>
                 <entry key="AssociateSignedUp" value="SIGN_UP"/>

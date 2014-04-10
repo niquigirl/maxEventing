@@ -20,4 +20,10 @@ public interface AssociateTaskRepository extends JpaRepository<AssociateTask, In
     List<AssociateTask> findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(Integer assigneeId, String descriptionKey);
     List<AssociateTask> findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNotNull(Integer assigneeId, String descriptionKey);
     List<AssociateTask> findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNotNull(Integer assigneeId, String descriptionKey, Integer subjectId);
+
+    List<AssociateTask> findByAssociateIdAndCompletedDateIsNotNull(Integer customerId);
+
+    List<AssociateTask> findByAssociateId(Integer customerIdVal);
+
+    List<AssociateTask> findByAssociateIdAndCompletedDateIsNull(Integer customerIdVal);
 }

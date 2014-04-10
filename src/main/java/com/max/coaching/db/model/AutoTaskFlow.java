@@ -3,7 +3,7 @@ package com.max.coaching.db.model;
 import javax.persistence.*;
 
 /**
- * Customer entity bean for MaxReporting (Exigo) customers
+ * Entity bean defining {@code AutoTaskFlow}
  */
 @SuppressWarnings("unused")
 @Entity
@@ -31,7 +31,7 @@ public class AutoTaskFlow extends CoachingMaxElement
     private Integer minRepeatDelayNumDays;
     @Basic
     @Column(name = "canRepeat", columnDefinition = "BIT", length = 1)
-    private boolean canRepeat;
+    private Boolean canRepeat = false;
 
     public static enum ASSIGNEE_TYPE
     {
@@ -113,12 +113,12 @@ public class AutoTaskFlow extends CoachingMaxElement
         this.minRepeatDelayNumDays = minRepeatDelayNumDays;
     }
 
-    public boolean isCanRepeat()
+    public Boolean isCanRepeat()
     {
         return canRepeat;
     }
 
-    public void setCanRepeat(boolean canRepeat)
+    public void setCanRepeat(Boolean canRepeat)
     {
         this.canRepeat = canRepeat;
     }

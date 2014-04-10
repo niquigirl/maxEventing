@@ -14,19 +14,17 @@
         <property name="filterString" value="verb = 'AssociateSignedUp' OR verb = 'CoachStarted' OR verb = 'WhyAdded' OR verb = 'ProspectAdded' OR verb = 'ProspectContacted'"/>
         <property name="subscriberName" value="TaskEngine"/>
     </bean>
-    <!--
-        <bean name="notificationSubscriber" class="com.max.messaging.subscribe.impl.NotificationSubscriber" init-method="register" destroy-method="doFinalize">
-            <property name="mailService" ref="mailService"/>
-            <property name="topicSettings" ref="userActivityTopicSettings"/>
-            <property name="filterString" value="verb = 'AssociateSignedUp' OR verb = 'ProspectAdded'"/>
-            <property name="subscriberName" value="Notifier"/>
-        </bean>
-        <bean name="webFeedSubscriber" class="com.max.messaging.subscribe.impl.WebFeedSubscriber" init-method="register" destroy-method="doFinalize">
-            <property name="topicSettings" ref="userActivityTopicSettings"/>
-            <property name="webChannel" value="root"/>
-            <property name="subscriberName" value="PubNubPoster"/>
-            <property name="publishKey" value="pub-c-02723478-99a6-4f63-9d74-f82e11034f59"/>
-            <property name="subscribeKey" value="sub-c-cd455cbc-a4c2-11e3-a0b1-02ee2ddab7fe"/>
-        </bean>
-    -->
+    <bean name="notificationSubscriber" class="com.max.messaging.subscribe.impl.NotificationSubscriber" init-method="register" destroy-method="doFinalize">
+        <property name="mailService" ref="mailService"/>
+        <property name="topicSettings" ref="userActivityTopicSettings"/>
+        <property name="filterString" value="verb = 'AssociateSignedUp' OR verb = 'ProspectAdded'"/>
+        <property name="subscriberName" value="Notifier"/>
+    </bean>
+    <bean name="webFeedSubscriber" class="com.max.messaging.subscribe.impl.WebFeedSubscriber" init-method="register" destroy-method="doFinalize">
+        <property name="topicSettings" ref="userActivityTopicSettings"/>
+        <property name="webChannel" value="root"/>
+        <property name="subscriberName" value="PubNubPoster"/>
+        <property name="publishKey" value="pub-c-02723478-99a6-4f63-9d74-f82e11034f59"/>
+        <property name="subscribeKey" value="sub-c-cd455cbc-a4c2-11e3-a0b1-02ee2ddab7fe"/>
+    </bean>
 </beans>

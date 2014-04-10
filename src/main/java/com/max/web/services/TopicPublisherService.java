@@ -25,10 +25,6 @@ public class TopicPublisherService
     @Autowired
     TopicPublisher userActivityTopicPublisher;
 
-    //
-    // Now, for the intentions of THIS servlet
-    //
-
     @RequestMapping(value = "test", method=RequestMethod.GET)
     public @ResponseBody String test()
     {

@@ -1,8 +1,6 @@
 package com.max.exigo;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
@@ -16,29 +14,24 @@ import java.sql.SQLException;
  * I'm using this rather than Repositories when join tables are needed.  I don't yet know how to avoid Hibernate's running
  * a separate query for each record when joins are needed
  */
-@Repository
 public class CustomerDao
 {
-    @Autowired
     DataSource exigoDataSource;
 
     Logger log = Logger.getLogger(CustomerDao.class);
 
-    @Transactional
     public Integer getEnrollerId(Integer associateId)
     {
         String sql = "select EnrollerID from Customers where CustomerID = ?";
         return getInteger(associateId, sql);
     }
 
-    @Transactional
     public Integer getSponsorId(Integer associateId)
     {
         String sql = "select SponsorID from Customers where CustomerID = ?";
         return getInteger(associateId, sql);
     }
 
-    @Transactional
     public Integer getUplineBronzeId(Integer associateId)
     {
         String sql = "select max(upline.customerID) from BinaryUpline upline " +
@@ -48,7 +41,6 @@ public class CustomerDao
         return getInteger(associateId, sql);
     }
 
-    @Transactional
     public Integer getUplineSilverId(Integer associateId)
     {
         String sql = "select max(upline.customerID) from BinaryUpline upline " +
@@ -58,7 +50,6 @@ public class CustomerDao
         return getInteger(associateId, sql);
     }
 
-    @Transactional
     public Integer getUplineGoldId(Integer associateId)
     {
         String sql = "select max(upline.customerID) from BinaryUpline upline " +
@@ -75,6 +66,7 @@ public class CustomerDao
      * @param sql {@code String}
      * @return {@code Integer}, or null if no value could be found
      */
+    @Transactional
     private Integer getInteger(Integer statementParamValue, String sql)
     {
         Integer value = null;
@@ -100,4 +92,13 @@ public class CustomerDao
         return value;
     }
 
+    public DataSource getExigoDataSource()
+    {
+        return exigoDataSource;
+    }
+
+    public void setExigoDataSource(DataSource exigoDataSource)
+    {
+        this.exigoDataSource = exigoDataSource;
+    }
 }
