@@ -46,7 +46,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         MaxMessage.Subject subject = new MaxMessage.Subject();
         subject.setObjectType("Subject.ObjectType");
         subject.setId(444);
-        message.setSubject(subject);
+        message.setObject(subject);
 
         message.setVerb("LoggedIn");
 
@@ -55,8 +55,8 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         taskSubscriber.getAssociateTask(message, "LOG_IN");
 
         // verify
-        verify(taskRepository).findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
-        verify(taskRepository, never()).findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString());
+        verify(taskRepository).findByAssociateIdAndTaskTaskClassAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
+        verify(taskRepository, never()).findByAssociateIdAndTaskTaskClassAndCompletedDateIsNull(anyInt(), anyString());
 
         System.out.println("Asserted existing Task are searched including subject data when Message includes subject data");
     }
@@ -89,8 +89,8 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         taskSubscriber.getAssociateTask(message, "LOG_IN");
 
         // verify
-        verify(taskRepository, never()).findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
-        verify(taskRepository).findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString());
+        verify(taskRepository, never()).findByAssociateIdAndTaskTaskClassAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
+        verify(taskRepository).findByAssociateIdAndTaskTaskClassAndCompletedDateIsNull(anyInt(), anyString());
 
         System.out.println("Asserted existing Associate tasks are searched without subject data when Message has no subject");
     }
@@ -109,7 +109,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
 
         AssociateTaskRepository taskRepository = mock(AssociateTaskRepository.class);
         when(taskSubscriber.getAssociateTaskRepository()).thenReturn(taskRepository);
-        when(taskRepository.findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString())).thenReturn(Collections.<AssociateTask>emptyList());
+        when(taskRepository.findByAssociateIdAndTaskTaskClassAndCompletedDateIsNull(anyInt(), anyString())).thenReturn(Collections.<AssociateTask>emptyList());
 
         MaxMessage message = new MaxMessage();
         MaxMessage.Actor actor = new MaxMessage.Actor();
@@ -124,8 +124,8 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         taskSubscriber.getAssociateTask(message, "LOG_IN");
 
         // verify
-        verify(taskRepository, never()).findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
-        verify(taskRepository).findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString());
+        verify(taskRepository, never()).findByAssociateIdAndTaskTaskClassAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
+        verify(taskRepository).findByAssociateIdAndTaskTaskClassAndCompletedDateIsNull(anyInt(), anyString());
         verify(taskSubscriber).createNewActivityRecord(any(MaxMessage.class), anyString());
 
         System.out.println("Asserted that if no existing pending task is found for an associate and event, a new one will be created");
@@ -147,7 +147,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         when(taskSubscriber.getAssociateTaskRepository()).thenReturn(taskRepository);
         List<AssociateTask> existingTasks = new LinkedList<>();
         existingTasks.add(new AssociateTask());
-        when(taskRepository.findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString())).thenReturn(existingTasks);
+        when(taskRepository.findByAssociateIdAndTaskTaskClassAndCompletedDateIsNull(anyInt(), anyString())).thenReturn(existingTasks);
 
         MaxMessage message = new MaxMessage();
         MaxMessage.Actor actor = new MaxMessage.Actor();
@@ -162,8 +162,8 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         taskSubscriber.getAssociateTask(message, "LOG_IN");
 
         // verify
-        verify(taskRepository, never()).findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
-        verify(taskRepository).findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(anyInt(), anyString());
+        verify(taskRepository, never()).findByAssociateIdAndTaskTaskClassAndSubjectIdAndCompletedDateIsNull(anyInt(), anyString(), anyInt());
+        verify(taskRepository).findByAssociateIdAndTaskTaskClassAndCompletedDateIsNull(anyInt(), anyString());
         verify(taskSubscriber, never()).createNewActivityRecord(any(MaxMessage.class), anyString());
 
         System.out.println("Asserted that the existing Associate Task is used if one is found pending for the associate/event in a message");
@@ -181,7 +181,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         MaxMessage maxMessage = new MaxMessage();
         MaxMessage.Subject subject = new MaxMessage.Subject();
         subject.setId(1234);
-        maxMessage.setSubject(subject);
+        maxMessage.setObject(subject);
 
         AssociateTask associateTask = new AssociateTask();
 
@@ -210,7 +210,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         MaxMessage.Subject subject = new MaxMessage.Subject();
         subject.setId(555);
         subject.setObjectType("subjectObject");
-        message.setSubject(subject);
+        message.setObject(subject);
 
         TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
         when(taskSubscriber.createNewActivityRecord(any(MaxMessage.class), anyString())).thenCallRealMethod();
@@ -239,6 +239,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         eventTaskMap.put("LoggedIn", "LOG_IN");
         eventTaskMap.put("ProspectAdded", "ADD_PROSPECT");
         eventTaskMap.put("ProspectContacted", "CONTACT_PROSPECT");
+        eventTaskMap.put("AssociateContacted", "CONTACT_ASSOCIATE");
         eventTaskMap.put("VideoWatched", "WATCH_VIDEO");
         eventTaskMap.put("WhyAdded", "ADD_WHY");
         eventTaskMap.put("WhyPhotoUploaded", "UPLOAD_WHY_PHOTO");

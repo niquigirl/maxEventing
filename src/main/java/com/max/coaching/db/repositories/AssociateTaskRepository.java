@@ -16,8 +16,8 @@ public interface AssociateTaskRepository extends JpaRepository<AssociateTask, In
 
     List<AssociateTask> findByAssociateIdAndTaskDescriptionKey(Integer assigneeId, String descriptionKey);
     List<AssociateTask> findByAssociateIdAndTaskDescriptionKeyAndSubjectId(Integer assigneeId, String descriptionKey, Integer subjectId);
-    List<AssociateTask> findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(Integer assigneeId, String descriptionKey, Integer subjectId);
-    List<AssociateTask> findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(Integer assigneeId, String descriptionKey);
+    List<AssociateTask> findByAssociateIdAndTaskTaskClassAndSubjectIdAndCompletedDateIsNull(Integer assigneeId, String descriptionKey, Integer subjectId);
+    List<AssociateTask> findByAssociateIdAndTaskTaskClassAndCompletedDateIsNull(Integer assigneeId, String descriptionKey);
     List<AssociateTask> findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNotNull(Integer assigneeId, String descriptionKey);
     List<AssociateTask> findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNotNull(Integer assigneeId, String descriptionKey, Integer subjectId);
 
@@ -27,7 +27,7 @@ public interface AssociateTaskRepository extends JpaRepository<AssociateTask, In
 
     List<AssociateTask> findByAssociateIdAndCompletedDateIsNull(Integer customerIdVal);
 
-    List<AssociateTask> findByCompletedDateIsNotNull();
+    List<AssociateTask> findByCompletedDateIsNotNullOrderByAssociateIdAsc();
 
-    List<AssociateTask> findByCompletedDateIsNull();
+    List<AssociateTask> findByCompletedDateIsNullOrderByAssociateIdAsc();
 }

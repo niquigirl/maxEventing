@@ -1,180 +1,182 @@
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+ALTER TABLE [dbo].[AssociateTask] DROP CONSTRAINT [DF_AssociateTask_ignored]
+GO
 
-CREATE SCHEMA IF NOT EXISTS `MaxEventing` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
-USE `MaxEventing` ;
+/****** Object:  Table [dbo].[Rating]    Script Date: 4/11/2014 12:02:10 PM ******/
+DROP TABLE [dbo].[Rating]
+GO
+/****** Object:  Table [dbo].[AutoTaskFlow]    Script Date: 4/11/2014 12:03:58 PM ******/
+ALTER TABLE [dbo].[AutoTaskFlow] DROP CONSTRAINT [DF_AutoTaskFlow_canRepeat]
+GO
+DROP TABLE [dbo].[AutoTaskFlow]
+GO
+/****** Object:  Table [dbo].[AssociateTask]    Script Date: 4/11/2014 11:01:05 AM ******/
+DROP TABLE [dbo].[AssociateTask]
+GO
+/****** Object:  Table [dbo].[TaskTemplate]    Script Date: 4/11/2014 11:59:47 AM ******/
+DROP TABLE [dbo].[TaskTemplate]
+GO
+/****** Object:  Table [dbo].[NotificationTemplate]    Script Date: 4/11/2014 12:03:05 PM ******/
+DROP TABLE [dbo].[NotificationTemplate]
+GO
+/****** Object:  Table [dbo].[ProspectContact]    Script Date: 4/11/2014 12:09:20 PM ******/
+DROP TABLE [dbo].[ProspectContact]
+GO
+/****** Object:  Table [dbo].[ProspectProperty]    Script Date: 4/11/2014 12:28:47 PM ******/
+DROP TABLE [dbo].[ProspectProperty]
+GO
+/****** Object:  Table [dbo].[Prospect]    Script Date: 4/11/2014 12:05:20 PM ******/
+DROP TABLE [dbo].[Prospect]
+GO
 
--- -----------------------------------------------------
--- Table `MaxEventing`.`task`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `MaxEventing`.`taskTemplate` ;
-DROP TABLE IF EXISTS `MaxEventing`.`associateTask` ;
-DROP TABLE IF EXISTS `MaxEventing`.`autoTaskFlow` ;
-DROP TABLE IF EXISTS `MaxEventing`.`prospect` ;
-DROP TABLE IF EXISTS `MaxEventing`.`prospectContact` ;
-DROP TABLE IF EXISTS `MaxEventing`.`prospectProperty` ;
-DROP TABLE IF EXISTS `MaxEventing`.`rating` ;
-DROP TABLE IF EXISTS `MaxEventing`.`notification` ;
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
 
--- -----------------------------------------------------
--- Table `MaxEventing`.`taskTemplate`
--- -----------------------------------------------------
+/********** Rating ************************/
+CREATE TABLE [dbo].[Rating](
+  [id] [bigint] IDENTITY(1,1) NOT NULL,
+  [ratingSetId] [bigint] NOT NULL,
+  [ratingValue] [int] NOT NULL,
+  [displayOrder] [int] NULL,
+  [descriptionKey] [varchar](200) NULL,
+  [image] [varchar](2084) NULL
+) ON [PRIMARY]
 
-CREATE  TABLE IF NOT EXISTS `MaxEventing`.`taskTemplate` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT ,
-  `descriptionKey` VARCHAR(200) NULL , -- internationalization
-  `url` VARCHAR(2084) NULL , -- navigate to complete
-  `detailUrl` VARCHAR(2084) NULL ,
-  `formUrl` VARCHAR(2084) NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `id` (`id` ASC))
-ENGINE = InnoDB;
+/********** Prospect ************************/
+CREATE TABLE [dbo].[Prospect](
+  [id] [bigint] IDENTITY(1,1) NOT NULL,
+  [name] [varchar](200) NULL,
+  [cellPhone] [varchar](50) NULL,
+  [homePhone] [varchar](50) NULL,
+  [workPhone] [varchar](50) NULL,
+  [secondaryPhone] [varchar](50) NULL,
+  [addressLine1] [varchar](200) NULL,
+  [addressLine2] [varchar](200) NULL,
+  [city] [varchar](50) NULL,
+  [state] [varchar](50) NULL,
+  [zip] [varchar](12) NULL,
+  [ownerId] [bigint] NULL,
+  [createdDate] [date] NOT NULL
+) ON [PRIMARY]
 
--- -----------------------------------------------------
--- Table `MaxEventing`.`associateTask`
--- -----------------------------------------------------
+/********** ProspectContact ************************/
+CREATE TABLE [dbo].[ProspectContact](
+  [id] [bigint] IDENTITY(1,1) NOT NULL,
+  [prospectId] [bigint] NOT NULL,
+  [date] [date] NULL,
+  [contactTypeDescriptionKey] [varchar](200) NULL,
+  [artifactDescriptionKey] [varchar](200) NULL,
+  [artifactUrl] [varchar](2084) NULL,
+  [notes] [varchar](max) NULL,
+  [createdDate] [date] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
-CREATE  TABLE IF NOT EXISTS `MaxEventing`.`associateTask` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `associateId` BIGINT NOT NULL ,
-  `taskTemplateId` BIGINT NOT NULL ,
-  `createdDate` DATETIME NULL ,
-  `dueDate` DATETIME NULL ,
-  `ignored` BIT(1) NULL,
-   PRIMARY KEY (`id`) ,
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC) ,
-  INDEX `idx_AssociateTask_TaskTemplate` (`taskTemplateId` ASC) ,
-  INDEX `idx_AssociateTask_AssociateId` (`associateId` ASC) ,
-  CONSTRAINT `AssociateTask_TaskTemplate_fk`
-    FOREIGN KEY (`taskTemplateId` )
-    REFERENCES `MaxEventing`.`taskTemplate` (`id`)
-)
-ENGINE = InnoDB;
+/********** ProspectProperty ************************/
+CREATE TABLE [dbo].[ProspectProperty](
+  [id] [bigint] IDENTITY(1,1) NOT NULL,
+  [prospectId] [bigint] NOT NULL,
+  [propertyNameKey] [varchar](200) NOT NULL,
+  [ratingResponseId] [bigint] NULL,
+  [textResponse] [varchar](max) NULL,
+  [notes] [varchar](max) NULL,
+  [dateResponse] [date] NULL,
+  [reminder] [date] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
+/********** NotificationTemplate ************************/
+CREATE TABLE [dbo].[NotificationTemplate](
+  [id] [bigint] IDENTITY(1,1) NOT NULL,
+  [eventName] [varchar](200) NOT NULL,
+  [recipientType] [varchar](80) NULL,
+  [emailTemplateUrl] [varchar](2084) NULL,
+  [smsTemplateUrl] [varchar](2084) NULL,
+  [pushTemplateUrl] [varchar](2084) NULL
+) ON [PRIMARY]
 
--- -----------------------------------------------------
--- Table `MaxEventing`.`autoTaskFlow`
--- -----------------------------------------------------
+/********** TaskTemplate ************************/
+CREATE TABLE [dbo].[TaskTemplate](
+  [id] [bigint] IDENTITY(1,1) NOT NULL,
+  [taskClass] [varchar](200) NOT NULL,
+  [descriptionKey] [varchar](200) NULL,
+  [url] [varchar](2084) NULL,
+  [detailUrl] [varchar](2084) NULL,
+  [formUrl] [varchar](2084) NULL
+) ON [PRIMARY]
 
-CREATE  TABLE IF NOT EXISTS `MaxEventing`.`autoTaskFlow` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT ,
-  `taskTemplateId` BIGINT NOT NULL ,
-  `eventName` VARCHAR(80) NULL ,
-  `dependentTaskTemplateId` BIGINT NULL ,
-  `numberCompleted` INT NULL ,
-  `autoDueDateNumDays` INT NULL ,
-  `assigneeType` VARCHAR(80) NULL ,
-   PRIMARY KEY (`id`) ,
-  CONSTRAINT `fk_AutoTaskFlow_TaskTemplate`
-    FOREIGN KEY (`taskTemplateId` )
-    REFERENCES `MaxEventing`.`taskTemplate` (`id` )
-)
-ENGINE = InnoDB;
+/********** AssociateTask ************************/
+CREATE TABLE [dbo].[AssociateTask](
+  [id] [bigint] IDENTITY(1,1) NOT NULL,
+  [associateId] [bigint] NOT NULL,
+  [taskTemplateId] [bigint] NOT NULL,
+  [createdDate] [date] NOT NULL,
+  [dueDate] [date] NULL,
+  [ignored] [tinyint] NULL,
+  [subjectId] [bigint] NULL,
+  [completedDate] [date] NULL,
+  [subjectObjectType] [varchar](80) NULL
+) ON [PRIMARY]
+GO
 
-
--- -----------------------------------------------------
--- Table `MaxEventing`.`prospect`
--- -----------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `MaxEventing`.`prospect` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(200) NULL ,
-  `cell` VARCHAR(45) NULL ,
-  `home` VARCHAR(45) NULL ,
-  `work` VARCHAR(45) NULL ,
-  `secondary` VARCHAR(45) NULL ,
-  `addressLine1` VARCHAR(200) NULL ,
-  `addressLine2` VARCHAR(200) NULL ,
-  `city` VARCHAR(45) NULL ,
-  `state` VARCHAR(45) NULL ,
-  `zip` VARCHAR(12) NULL ,
-  `ownerId` BIGINT NULL , -- associate ID
-  `dateCreated` DATETIME NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `fk_Prospect_Name_idx` (`name` ASC),
-  INDEX `idx_Prospect_OwnerId` (`ownerId` ASC)
-)
-ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `MaxEventing`.`prospectContact`
--- ------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `MaxEventing`.`prospectContact` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `prospectId` BIGINT NULL ,
-  `date` DATE NULL ,
-  `contactTypeDescriptionKey` VARCHAR(200) NULL ,
-  `artifactDescriptionKey` VARCHAR(200) NULL , -- need to internationalize
-  `artifactUrl` VARCHAR(2084) NULL ,
-  `notes` LONGTEXT NULL ,
-  `createdDate` DATETIME NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `fk_ProspectContact_Prospect_idx` (`prospectId` ASC) ,
-  CONSTRAINT `ProspectContactProspectId`
-    FOREIGN KEY (`prospectId` )
-    REFERENCES `MaxEventing`.`prospect` (`id` )
-)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `MaxEventing`.`rating`
--- ------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `MaxEventing`.`rating` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `ratingSetId` BIGINT NULL , -- for grouping
-  `ratingValue` INT NULL ,
-  `displayOrder` INT NULL ,
-  `descriptionKey` VARCHAR(200) NULL ,
-  `image` VARCHAR(2084) NULL ,
-  PRIMARY KEY (`id`)
-)
-  ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `MaxEventing`.`prospectProperty`
--- ------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `MaxEventing`.`prospectProperty` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `prospectId` BIGINT NULL ,
-  `propertyNameKey` VARCHAR(200) NULL ,
-  `ratingResponseId` BIGINT NULL ,
-  `ratingSetId` BIGINT NULL ,
-  `textResponse` LONGTEXT ,
-  `notes` LONGTEXT NULL ,
-  `dateResponse` DATETIME NULL ,
-  `reminder` DATETIME NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `fk_ProspectProperty_Prospect_idx` (`prospectId` ASC) ,
-  INDEX `fk_ProspectProperty_Reminder_idx` (`reminder` DESC) ,
-  CONSTRAINT `ProspectPropertyProspectId`
-    FOREIGN KEY (`prospectId` )
-    REFERENCES `MaxEventing`.`prospect` (`id` )
-)
-ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `MaxEventing`.`notificationTemplate`
--- ------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `MaxEventing`.`notificationTemplate` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `eventName` VARCHAR(200) NULL ,
-  `recipientType` VARCHAR(80) NULL ,
-  `emailTemplateUrl` VARCHAR(2084) NULL ,
-  `smsTemplateUrl` VARCHAR(2084) NULL ,
-  `pushTemplateUrl` VARCHAR(2084) NULL ,
-  PRIMARY KEY (`id`)
-)
-ENGINE = InnoDB;
+/********** AutoTaskFlow ************************/
+CREATE TABLE [dbo].[AutoTaskFlow](
+  [id] [bigint] IDENTITY(1,1) NOT NULL,
+  [resultTaskTemplateId] [bigint] NOT NULL,
+  [triggerTaskTemplateId] [bigint] NULL,
+  [dependentTaskTemplateId] [bigint] NULL,
+  [numberToComplete] [int] NULL,
+  [autoDueDateNumDays] [int] NULL,
+  [assigneeType] [varchar](80) NOT NULL,
+  [minRepeatDelayNumDays] [int] NULL,
+  [canRepeat] [bit] NOT NULL,
+  [subjectType] [varchar](80) NULL,
+  [description] [varchar](max) NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+ALTER TABLE [dbo].[AutoTaskFlow] ADD  CONSTRAINT [DF_AutoTaskFlow_canRepeat]  DEFAULT ((0)) FOR [canRepeat]
+GO
 
 
 
+SET ANSI_PADDING OFF
+GO
 
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+ALTER TABLE [dbo].[AssociateTask] ADD  CONSTRAINT [DF_AssociateTask_ignored]  DEFAULT ((0)) FOR [ignored]
+GO
+
+
+insert into [dbo].[TaskTemplate](taskClass, descriptionKey, url, detailUrl, formUrl) values
+  ('WATCH_VIDEO', 'WATCH_VIDEO', 'www.videos.max.com', 'www.videos.max.com', 'www.maxcoach.com/CreateWatchVideoTask.html'),
+  ('LOG_IN', 'LOG_IN', 'www.yourvo.max.com/login', 'www.maxcoach.com/LoginTaskDetails.html', 'www.maxcoach.com/CreateLoginTask.html'),
+  ('SIGN_UP', 'SIGN_UP', 'FOR TRACKING PURPOSES ONLY', 'www.yourvo.max.com/SignUpDetails.html', 'FOR TRACKING PURPOSES ONLY'),
+  ('START_COACH', 'START_COACH', 'www.yourvo.max.com/enableCoach', 'www.maxcoach.com/WelcomeToMaxCoaching.html', 'www.maxcoach.com/CreateStartYourCoachTask.html'),
+  ('ENTER_YOUR_WHY', 'ENTER_YOUR_WHY', 'www.yourvo.max.com/WhatsYourWhy.html', 'www.maxcoach.com/WhyYouShouldEnterYourWhy.html', 'www.maxcoach.com/CreateEnterYourWhyTask.html'),
+  ('ADD_PROSPECT', 'ADD_PROSPECT', 'www.yourvo.max.com/NewProspect.html', 'www.maxcoach.com/WhyAndHowYouShouldAddProspects.html', 'www.maxcoach.com/CreateAddProspectTask.html'),
+  ('CONTACT_PROSPECT', 'CONTACT_PROSPECT', 'www.yourvo.max.com/LogProspectContact.html', 'www.maxcoach.com/8PhasesOfProspectContacts.html', 'www.maxcoach.com/CreateContactProspectTask.html'),
+  ('CONTACT_ASSOCIATE', 'CONTACT_ASSOCIATE', 'www.yourvo.max.com/LogAssociateContact.html', 'www.maxcoach.com/BeAGoodMentorToYourDownlineAssociates.html', 'www.maxcoach.com/CreateContactAssociateTask.html'),
+  ('ADD_5_PROSPECTS', 'ADD_5_PROSPECTS', 'www.yourvo.max.com/NewProspect.html', 'www.maxcoach.com/WhyYouShouldAdd5Prospects.html', 'www.maxcoach.com/CreateAdd5ProspectsTask.html'),
+  ('CONTACT_ASSOCIATE', 'SPONSOR_CONTACT_NEW_ASSOCIATE', 'www.LogNewAssociateContact.html?uplineType=sponsor', 'www.WhyYouShouldContactNewAssociates.html?uplineType=sponsor', 'www.maxcoach.com/CreateContactNewAssociateTask.html?uplineType=sponsor'),
+  ('CONTACT_ASSOCIATE', 'ENROLLER_CONTACT_NEW_ASSOCIATE', 'www.LogNewAssociateContact.html?uplineType=enroller', 'www.WhyYouShouldContactNewAssociates.html?uplineType=enroller', 'www.maxcoach.com/CreateContactNewAssociateTask.html?uplineType=enroller'),
+  ('CONTACT_ASSOCIATE', 'UPLINE_BRONZE_CONTACT_NEW_ASSOCIATE', 'www.LogNewAssociateContact.html?uplineType=bronze', 'www.WhyYouShouldContactNewAssociates.html?uplineType=bronze', 'www.maxcoach.com/CreateContactNewAssociateTask.html?uplineType=bronze'),
+  ('CONTACT_ASSOCIATE', 'UPLINE_SILVER_CONTACT_NEW_ASSOCIATE', 'www.LogNewAssociateContact.html?uplineType=silver', 'www.WhyYouShouldContactNewAssociates.html?uplineType=silver', 'www.maxcoach.com/CreateContactNewAssociateTask.html?uplineType=silver'),
+  ('CONTACT_ASSOCIATE', 'UPLINE_GOLD_CONTACT_NEW_ASSOCIATE', 'www.LogNewAssociateContact.html?uplineType=gold', 'www.WhyYouShouldContactNewAssociates.html?uplineType=gold', 'www.maxcoach.com/CreateContactNewAssociateTask.html?uplineType=gold')
+
+insert into [dbo].[AutoTaskFlow]
+(description, resultTaskTemplateId, triggerTaskTemplateId, dependentTaskTemplateId, numberToComplete, autoDueDateNumDays, assigneeType, minRepeatDelayNumDays, canRepeat, subjectType)
+values
+  ('Create ''Enter your why'' task on ''Start Your Coach''',
+   (select id from TaskTemplate where descriptionKey = 'ENTER_YOUR_WHY'), (select id from TaskTemplate where descriptionKey = 'START_COACH'),
+   null, null, null, 'ASSOCIATE', null, 0, null),
+  ('Create ''Add 5 Prospects'' task when why has been entered if coach has been started',
+   (select id from TaskTemplate where descriptionKey = 'ADD_5_PROSPECTS'), (select id from TaskTemplate where descriptionKey = 'ENTER_YOUR_WHY'), (select id from TaskTemplate where descriptionKey = 'START_COACH'),
+   5, null, 'ASSOCIATE', 1, 1, null),
+  ('Create ''Contact Prospect'' task when any Prospects are added',
+   (select id from TaskTemplate where descriptionKey = 'CONTACT_PROSPECT'), (select id from TaskTemplate where descriptionKey = 'ADD_PROSPECT'),
+   null, 8, 3, 'ASSOCIATE', null, 1, 'PROSPECT'),
+  ('Create ''Contact New Associate'' task for the Sponsor when new Associates sign',
+   (select id from TaskTemplate where descriptionKey = 'SPONSOR_CONTACT_NEW_ASSOCIATE'), (select id from TaskTemplate where descriptionKey = 'SIGN_UP'),
+   null, null, 3, 'SPONSOR', null, 0, 'ASSOCIATE'),
+  ('Create ''Contact New Associate'' task for the Upline Gold when new Associates sign',
+   (select id from TaskTemplate where descriptionKey = 'UPLINE_GOLD_CONTACT_NEW_ASSOCIATE'), (select id from TaskTemplate where descriptionKey = 'SIGN_UP'),
+   null, null, 3, 'UPLINE_GOLD', null, 0, 'ASSOCIATE')

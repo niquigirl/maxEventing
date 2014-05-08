@@ -29,7 +29,7 @@
     <bean id="userActivityTopicSettings" class="com.max.messaging.TopicSettings">
         <property name="qpidIcf" value="org.wso2.andes.jndi.PropertiesFileInitialContextFactory"/>
         <property name="carbonClientId" value="carbon"/>
-        <property name="carbonDefaultHostname" value="localhost"/>
+        <property name="carbonDefaultHostname" value="maxbussvcs.com"/>
         <property name="carbonDefaultPort" value="5672"/>
         <property name="connectionFactoryName" value="andesConnectionfactory"/>
         <property name="connectionFactoryNamePrefix" value="connectionfactory."/>

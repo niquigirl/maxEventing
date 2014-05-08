@@ -1,6 +1,8 @@
 package com.max.exigo;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
@@ -14,8 +16,10 @@ import java.sql.SQLException;
  * I'm using this rather than Repositories when join tables are needed.  I don't yet know how to avoid Hibernate's running
  * a separate query for each record when joins are needed
  */
+@Repository
 public class CustomerDao
 {
+    @Autowired
     DataSource exigoDataSource;
 
     Logger log = Logger.getLogger(CustomerDao.class);

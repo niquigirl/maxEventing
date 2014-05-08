@@ -65,7 +65,9 @@ http://www.springframework.org/schema/data/jpa http://www.springframework.org/sc
         <property name="entityManagerFactory" ref="maxEntityManagerFactory" />
     </bean>
 
+<!--
     <bean name="customerDao" class="com.max.exigo.CustomerDao">
         <property name="exigoDataSource" ref="exigoDataSource"/>
     </bean>
+-->
 </beans>

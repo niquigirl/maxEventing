@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Topic subscriber which handles tasks related to notifications
+ * Topic subscriber which handles notifications
  */
 public class NotificationSubscriber extends DurableTopicSubscriber
 {

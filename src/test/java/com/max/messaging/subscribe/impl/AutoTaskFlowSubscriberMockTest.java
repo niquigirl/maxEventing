@@ -195,7 +195,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
         MaxMessage.Subject subject = new MaxMessage.Subject();
         subject.setObjectType("SomeSubjectObjectType");
         subject.setId(555);
-        message.setSubject(subject);
+        message.setObject(subject);
 
         AssociateTask newTask = subscriber.createNewTask(flow, message, 123);
 
@@ -234,7 +234,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
         MaxMessage.Subject subject = new MaxMessage.Subject();
         subject.setObjectType("SomeSubjectObjectType");
         subject.setId(555);
-        message.setSubject(subject);
+        message.setObject(subject);
 
         AssociateTask newTask = subscriber.createNewTask(flow, message, 123);
 

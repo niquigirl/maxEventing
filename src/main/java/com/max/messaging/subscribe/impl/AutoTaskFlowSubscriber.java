@@ -66,7 +66,7 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
 
                 if (assigneeId != null)
                 {
-                    if (taskShouldBeSpun(curFlow, assigneeId, message.getSubject() != null ? message.getSubject().getId() : null))
+                    if (taskShouldBeSpun(curFlow, assigneeId, message.getObject() != null ? message.getObject().getId() : null))
                     {
                         AssociateTask associateTask = createNewTask(curFlow, message, assigneeId);
                         tasksToPersist.add(associateTask);
@@ -111,7 +111,7 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
             task.setDueDate(DateUtils.addDays(new Date(), dueInNumDays));
         }
 
-        MaxMessage.Subject subject = message.getSubject();
+        MaxMessage.Subject subject = message.getObject();
         if (subject != null)
         {
             task.setSubjectObjectType(subject.getObjectType());

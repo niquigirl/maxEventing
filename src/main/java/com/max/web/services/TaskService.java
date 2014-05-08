@@ -85,9 +85,9 @@ public class TaskService extends MaxWebService
             associateTasks = repository.findAll();
         }
         else if (completed)
-            associateTasks = repository.findByCompletedDateIsNotNull();
+            associateTasks = repository.findByCompletedDateIsNotNullOrderByAssociateIdAsc();
         else
-            associateTasks = repository.findByCompletedDateIsNull();
+            associateTasks = repository.findByCompletedDateIsNullOrderByAssociateIdAsc();
 
         results.setData(convertToAssociateTaskBean(associateTasks, lang));
 

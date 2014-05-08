@@ -28,7 +28,7 @@ public class TopicPublisherService
     @RequestMapping(value = "test", method=RequestMethod.GET)
     public @ResponseBody String test()
     {
-        log.debug("Just hit the Test service!");
+        log.debug("Just hit the Test service !");
         return "Just hit the Test service!";
     }
 

@@ -18,7 +18,7 @@ public class AutoTaskFlow extends CoachingMaxElement
     @JoinColumn(name = "triggerTaskTemplateId", referencedColumnName = "id")
     private TaskTemplate triggerTask;
 
-    @OneToOne(fetch=FetchType.LAZY)
+    @OneToOne(fetch=FetchType.EAGER)
     @JoinColumn(name = "dependentTaskTemplateId", referencedColumnName = "id")
     private TaskTemplate dependentTask;
 

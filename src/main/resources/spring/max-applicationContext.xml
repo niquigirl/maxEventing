@@ -17,7 +17,7 @@
     </bean>
 
     <context:component-scan base-package="com.max.web.services" />
-    <!--<context:component-scan base-package="com.max.exigo" />-->
+    <context:component-scan base-package="com.max.exigo" />
     <context:component-scan base-package="com.max.coaching" />
     <context:component-scan base-package="com.max.services" />
 

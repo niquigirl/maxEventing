@@ -20,7 +20,7 @@ package com.max.messaging.publish;
 
 import com.max.messaging.TopicSettings;
 import com.max.messaging.message.MaxMessage;
-import com.max.messaging.message.MaxMessageUtils;
+import com.max.messaging.message.TopicFilterProperties;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,7 +80,7 @@ public class TopicPublisher
 
     private void setMessageProperties(TextMessage objectMessage, MaxMessage msgObject) throws JMSException
     {
-        Properties metaProperties = MaxMessageUtils.getMetaProperties(msgObject);
+        Properties metaProperties = TopicFilterProperties.getMetaPropertiesForPublish(msgObject);
         for (Object curProperty : metaProperties.keySet())
         {
             objectMessage.setStringProperty(curProperty.toString(), metaProperties.get(curProperty).toString());

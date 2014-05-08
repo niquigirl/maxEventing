@@ -27,12 +27,12 @@ public class MaxMessage implements Serializable
     public static final Object SUBJECT_ID = "subject.objectId";
 
     private String verb;
-    private String language = "en";
+    private Subject object;
+    private Actor actor;
     private Date published;
+    private String language = "en";
     private String generator;
     private String provider;
-    public Actor actor;
-    public Subject subject;
     private Location location;
 
     public MaxMessage()
@@ -117,16 +117,16 @@ public class MaxMessage implements Serializable
         this.actor = actor;
     }
 
-    public Subject getSubject()
+    public Subject getObject()
     {
-        if (subject == null)
-            subject = new Subject();
-        return subject;
+        if (object == null)
+            object = new Subject();
+        return object;
     }
 
-    public void setSubject(Subject subject)
+    public void setObject(Subject object)
     {
-        this.subject = subject;
+        this.object = object;
     }
 
     @SuppressWarnings("unused")
@@ -146,7 +146,7 @@ public class MaxMessage implements Serializable
         private String objectType;
         public Integer id;
         private String displayName;
-        private String customerType;
+        private String objectSubtype;
 
         public String getObjectType()
         {
@@ -180,15 +180,15 @@ public class MaxMessage implements Serializable
         }
 
         @SuppressWarnings("unused")
-        public String getCustomerType()
+        public String getObjectSubtype()
         {
-            return customerType;
+            return objectSubtype;
         }
 
         @SuppressWarnings("unused")
-        public void setCustomerType(String customerType)
+        public void setObjectSubtype(String objectSubtype)
         {
-            this.customerType = customerType;
+            this.objectSubtype = objectSubtype;
         }
     }
 
@@ -196,7 +196,7 @@ public class MaxMessage implements Serializable
     {
         private Integer id;
         private String objectType;
-        private Map<String, String> metadata;
+        private Map<String, String> properties;
 
         public Integer getId()
         {
@@ -219,44 +219,44 @@ public class MaxMessage implements Serializable
         }
 
         @SuppressWarnings("unused")
-        public Map<String, String> getMetadata()
+        public Map<String, String> getProperties()
         {
-            return metadata;
+            return properties;
         }
 
         @SuppressWarnings("unused")
-        public void setMetadata(Map<String, String> metadata)
+        public void setProperties(Map<String, String> properties)
         {
-            this.metadata = metadata;
+            this.properties = properties;
         }
     }
     public static class Location
     {
-        private String latitude;
-        private String longitude;
+        private String lat;
+        private String lng;
 
         @SuppressWarnings("unused")
-        public String getLatitude()
+        public String getLat()
         {
-            return latitude;
+            return lat;
         }
 
         @SuppressWarnings("unused")
-        public void setLatitude(String latitude)
+        public void setLat(String lat)
         {
-            this.latitude = latitude;
+            this.lat = lat;
         }
 
         @SuppressWarnings("unused")
-        public String getLongitude()
+        public String getLng()
         {
-            return longitude;
+            return lng;
         }
 
         @SuppressWarnings("unused")
-        public void setLongitude(String longitude)
+        public void setLng(String lng)
         {
-            this.longitude = longitude;
+            this.lng = lng;
         }
     }
 

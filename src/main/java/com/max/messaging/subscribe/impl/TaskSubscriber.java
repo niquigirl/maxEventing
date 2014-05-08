@@ -40,7 +40,7 @@ public class TaskSubscriber extends DurableTopicSubscriber
         String taskDescriptionKey = getEventTaskMapping().getTaskName(message.getVerb());
         if (taskDescriptionKey == null)
         {
-            log.error("Could not record activity for message verb " + message.getVerb() + ". Exiting process");
+            log.warn("Could not record activity for message verb " + message.getVerb() + ". Exiting process");
             return;
         }
 
@@ -61,15 +61,15 @@ public class TaskSubscriber extends DurableTopicSubscriber
     AssociateTask getAssociateTask(MaxMessage message, String taskDescriptionKey)
     {
         List<AssociateTask> incompleteExistingTasks;
-        if (message.getSubject() != null && message.getSubject().getId() != null)
+        if (message.getObject() != null && message.getObject().getId() != null)
         {
             incompleteExistingTasks =
-                    getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNull(message.getActor().getId(), taskDescriptionKey, message.getSubject().getId());
+                    getAssociateTaskRepository().findByAssociateIdAndTaskTaskClassAndSubjectIdAndCompletedDateIsNull(message.getActor().getId(), taskDescriptionKey, message.getObject().getId());
         }
         else
         {
             incompleteExistingTasks =
-                    getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNull(message.getActor().getId(), taskDescriptionKey);
+                    getAssociateTaskRepository().findByAssociateIdAndTaskTaskClassAndCompletedDateIsNull(message.getActor().getId(), taskDescriptionKey);
         }
 
         AssociateTask activityRecord;
@@ -89,8 +89,8 @@ public class TaskSubscriber extends DurableTopicSubscriber
     void populateCompletedData(MaxMessage message, AssociateTask activityRecord)
     {
         activityRecord.setCompletedDate(new Date());
-        activityRecord.setSubjectId(message.getSubject() != null ? message.getSubject().getId() : null);
-        activityRecord.setSubjectObjectType(message.getSubject() != null ? message.getSubject().getObjectType() : null);
+        activityRecord.setSubjectId(message.getObject() != null ? message.getObject().getId() : null);
+        activityRecord.setSubjectObjectType(message.getObject() != null ? message.getObject().getObjectType() : null);
     }
 
     /**
@@ -114,8 +114,8 @@ public class TaskSubscriber extends DurableTopicSubscriber
         task.setTask(byDescriptionKey);
         task.setAssociateId(message.getActor().getId());
         task.setCreatedDate(new Date());
-        task.setSubjectId(message.getSubject() != null ? message.getSubject().getId() : null);
-        task.setSubjectObjectType(message.getSubject() != null ? message.getSubject().getObjectType() : null);
+        task.setSubjectId(message.getObject() != null ? message.getObject().getId() : null);
+        task.setSubjectObjectType(message.getObject() != null ? message.getObject().getObjectType() : null);
 
         return task;
     }

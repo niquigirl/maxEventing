@@ -11,6 +11,7 @@ import javax.persistence.Table;
 @Table(name = "TaskTemplate")
 public class TaskTemplate extends CoachingMaxElement
 {
+    private String taskClass;
     private String descriptionKey;
     private String url;
     private String detailUrl;
@@ -54,5 +55,15 @@ public class TaskTemplate extends CoachingMaxElement
     public void setFormUrl(String formUrl)
     {
         this.formUrl = formUrl;
+    }
+
+    public String getTaskClass()
+    {
+        return taskClass;
+    }
+
+    public void setTaskClass(String taskClass)
+    {
+        this.taskClass = taskClass;
     }
 }
