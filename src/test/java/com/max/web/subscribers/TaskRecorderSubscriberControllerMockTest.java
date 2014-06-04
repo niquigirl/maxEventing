@@ -1,11 +1,12 @@
-package com.max.messaging.subscribe.impl;
+package com.max.web.subscribers;
 
 import com.max.BaseMockUnitTest;
 import com.max.coaching.db.model.AssociateTask;
 import com.max.coaching.db.model.TaskTemplate;
 import com.max.coaching.db.repositories.AssociateTaskRepository;
 import com.max.coaching.db.repositories.TaskTemplateRepository;
-import com.max.messaging.message.MaxMessage;
+import com.max.web.controller.EventTaskMapping;
+import com.max.web.model.MaxMessage;
 import org.junit.Test;
 
 import java.util.*;
@@ -17,9 +18,9 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
- * Validate logic behind TaskSubscriber
+ * Validate logic behind TaskActivityRecorderSubscriberController
  */
-public class TaskSubscriberMockTest extends BaseMockUnitTest
+public class TaskRecorderSubscriberControllerMockTest extends BaseMockUnitTest
 {
 
     /**
@@ -30,7 +31,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
     @Test
     public void testGetAssociateTaskWSubject() throws Exception
     {
-        TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
+        TaskActivityRecorderSubscriberController taskSubscriber = mock(TaskActivityRecorderSubscriberController.class);
         when(taskSubscriber.getEventTaskMapping()).thenReturn(createEventTaskMap());
         when(taskSubscriber.getAssociateTask(any(MaxMessage.class), anyString())).thenCallRealMethod();
 
@@ -69,7 +70,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
     @Test
     public void testGetAssociateTaskWOutSubject() throws Exception
     {
-        TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
+        TaskActivityRecorderSubscriberController taskSubscriber = mock(TaskActivityRecorderSubscriberController.class);
         when(taskSubscriber.getEventTaskMapping()).thenReturn(createEventTaskMap());
         when(taskSubscriber.getAssociateTask(any(MaxMessage.class), anyString())).thenCallRealMethod();
 
@@ -103,7 +104,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
     @Test
     public void testGetAssociateTaskWOutSubject_NoExistingTaskFound() throws Exception
     {
-        TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
+        TaskActivityRecorderSubscriberController taskSubscriber = mock(TaskActivityRecorderSubscriberController.class);
         when(taskSubscriber.getEventTaskMapping()).thenReturn(createEventTaskMap());
         when(taskSubscriber.getAssociateTask(any(MaxMessage.class), anyString())).thenCallRealMethod();
 
@@ -139,7 +140,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
     @Test
     public void testGetAssociateTaskWOutSubject_ExistingTaskFound() throws Exception
     {
-        TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
+        TaskActivityRecorderSubscriberController taskSubscriber = mock(TaskActivityRecorderSubscriberController.class);
         when(taskSubscriber.getEventTaskMapping()).thenReturn(createEventTaskMap());
         when(taskSubscriber.getAssociateTask(any(MaxMessage.class), anyString())).thenCallRealMethod();
 
@@ -175,7 +176,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
     @Test
     public void testPopulateData()
     {
-        TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
+        TaskActivityRecorderSubscriberController taskSubscriber = mock(TaskActivityRecorderSubscriberController.class);
         doCallRealMethod().when(taskSubscriber).populateCompletedData(any(MaxMessage.class), any(AssociateTask.class));
 
         MaxMessage maxMessage = new MaxMessage();
@@ -212,7 +213,7 @@ public class TaskSubscriberMockTest extends BaseMockUnitTest
         subject.setObjectType("subjectObject");
         message.setObject(subject);
 
-        TaskSubscriber taskSubscriber = mock(TaskSubscriber.class);
+        TaskActivityRecorderSubscriberController taskSubscriber = mock(TaskActivityRecorderSubscriberController.class);
         when(taskSubscriber.createNewActivityRecord(any(MaxMessage.class), anyString())).thenCallRealMethod();
 
         TaskTemplate task = new TaskTemplate();

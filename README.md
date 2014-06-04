@@ -25,6 +25,7 @@ The standard JSON messaging format is as follows:
    "published":"Wed May 07 18:22:17 MDT 2014"
 }
 
+------------------------------
 ==============================
 Subjects
 ==============================
@@ -35,8 +36,6 @@ User(id, type)
  *Deleted (user Deleted user)
 
 Order(id)
- *PaymentFailed (process PaymentFailed order)
- *PaymentProcessed (process PaymentProcessed order)
  *Placed (user Placed order)
  *Shipped (warehouse Shipped order)
  *Cancelled (user Cancelled order)
@@ -45,11 +44,6 @@ Product(id,SKU)
  *Added (user Added product)
  *Modified (user Modified product) -- (price, SKU, description, etc.)
  *Deleted (user Deleted product)
-
-Market(id of country?)
- *Added (user Added market)  -- (country, date, language, etc.)
- *Modified
- *Deleted
 
 Event(description, dateTimeStart, dateTimeEnd, location)
  *Added (user Added event, automatedProcess Added event)
@@ -72,6 +66,12 @@ Task(id)
  *Modified (user Modified task)
  *Deleted (user Deleted task)
 
+Payment(id, type, amount, currency)
+ *PaymentFailed (process PaymentFailed payment(commission, 567, 32.50, USD), user PaymentFailed payment(order, 123, 500, CAD))
+ *PaymentProcessed (process PaymentProcessed order)
+ *PaymentProcessed (user PaymentProcessed commission, Exigo PaymentProcessed payment)
+
+------------------------------
 ==============================
 Actors
 ==============================
@@ -81,22 +81,25 @@ Warehouse(id)
  *Modified
  *Deleted
 
-Process/Application/Component (name, url) (e.g. Exigo, Commissioning, Merchant, JavaAPI)
+Process/Application/Component (name, url) (e.g. Exigo, VO, Merchant, JavaAPI, Coach)
  *Added(task)
  *Shipped(order)
- *PaymentProcessed
- *PaymentFailed
+ *PaymentProcessed (Exigo PaymentProcessed order, Exigo PaymentProcessed commission)
+ *PaymentFailed (Exigo PaymentFailed order, Exigo PaymentFailed commission)
 
 User(id, type)
- *Enrolled
- *Moved
- *Advanced
- *LoggedIn
- *LoggedOut
- *Contacted
- *StartedCoaching
- *StoppedCoaching
- *StartedUsing (Resource: video, audio, image, web page, etc.)
- *StoppedUsing (Resource: video, audio, image, web page, etc.)
+ *Enrolled (user Enrolled user(self/other))
+ *Moved (user Moved noSubject Target-Left)
+ *AdvancedRank (user AdvancedRank noSubject Target-Gold)
+ *LoggedIn (user LoggedIn process)
+ *LoggedOut (user LoggedOut resource)
+ *Contacted (user Contacted user, user Contacted prospect)
+ *Started (user Started coaching, user Started video) (Resource: video, audio, image, web page, etc.)
+ *Stopped (user Stopped coaching, user Stopped video) (Resource: video, audio, image, web page, etc.)
+ *Completed (user Completed video, user Completed task)
 
-
+------------------------------
+==============================
+Generators
+==============================
+Exigo, VO, JavaAPI, Coach

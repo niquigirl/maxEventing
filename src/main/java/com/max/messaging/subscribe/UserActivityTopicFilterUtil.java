@@ -1,27 +1,19 @@
-package com.max.messaging.message;
+package com.max.messaging.subscribe;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.max.web.model.MaxMessage;
 
 import java.util.Properties;
 
 /**
- * This class provides methods around creating the properties on which subscribers can filter
+ * This class creates a list of Properties to be used as metadata on the queue that can be used for filtering.
+ * If there are any attributes of {@link com.max.web.model.MaxMessage} that should be filter'able, add that here
  */
-public class TopicFilterProperties
+public class UserActivityTopicFilterUtil
 {
-    String verb;
-    String actorId;
-    String actorObjectType;
-    @JsonProperty("ObjectId")
-    String subjectId;
-    @JsonProperty("ObjectType")
-    String subjectObjectType;
-    String targetId;
-
     /**
      * From the Message provided, create the top-level properties that can be used for subscribers to filter
      *
-     * @param message {@link com.max.messaging.message.MaxMessage} Message from which to obtain values for the
+     * @param message {@link com.max.web.model.MaxMessage} Message from which to obtain values for the
      *                                                            properties exposed for Subscribers to filter
      * @return {@code Properties}
      */

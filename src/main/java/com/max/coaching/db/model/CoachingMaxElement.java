@@ -1,12 +1,12 @@
 package com.max.coaching.db.model;
 
-import org.json.JSONObject;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
 /**
- * Created by neastman on 3/27/14.
+ * Base entity class automatically creating an @Id element named 'id'
  */
 @MappedSuperclass
 public class CoachingMaxElement implements Serializable
@@ -16,6 +16,7 @@ public class CoachingMaxElement implements Serializable
     @Column(name = "id")
     private Integer id;
 
+    @JsonIgnore
     public Integer getId()
     {
         return id;
@@ -26,9 +27,4 @@ public class CoachingMaxElement implements Serializable
         this.id = id;
     }
 
-    @Override
-    public String toString()
-    {
-        return new JSONObject(this).toString();
-    }
 }

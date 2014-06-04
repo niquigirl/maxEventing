@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
- * Created by neastman on 3/28/14.
+ * Validate behavior of TaskTemplateRepository
  */
 public class TaskTemplateRepositoryTest extends BaseSpringInjectionUnitTest
 {
@@ -26,6 +26,7 @@ public class TaskTemplateRepositoryTest extends BaseSpringInjectionUnitTest
         foo.setDetailUrl("www.detail.com");
         foo.setFormUrl("www.form.com");
         foo.setUrl("www.url.com");
+        foo.setTaskClass("SOME_CLASS");
 
         savedTemplate = repository.save(foo);
     }

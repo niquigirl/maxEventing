@@ -19,53 +19,50 @@
 package com.max.messaging.publish;
 
 import com.max.messaging.TopicSettings;
-import com.max.messaging.message.MaxMessage;
-import com.max.messaging.message.TopicFilterProperties;
+import com.max.messaging.subscribe.UserActivityTopicFilterUtil;
+import com.max.web.model.MaxMessage;
 import org.apache.log4j.Logger;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.io.IOException;
 import java.util.Properties;
 
-public class TopicPublisher
+public class UserActivityTopicPublisher
 {
-    private static final Logger log = Logger.getLogger(TopicPublisher.class);
+    private static final Logger log = Logger.getLogger(UserActivityTopicPublisher.class);
 
     private TopicSettings topicSettings;
 
-
-    public void sendMessages(String topicName, String message) throws IOException, JSONException, JMSException, NamingException
-    {
-        log.debug("Request to sendMessage by String: " + message);
-
-        MaxMessage msgObject = MaxMessage.getInstance(message);
-        sendMessage(topicName, msgObject);
-    }
-
-    public void sendMessage(String topicName, MaxMessage msgObject) throws NamingException, JMSException
+    /**
+     * Publish a message to the UserActivity Topic
+     *
+     * @param msgObject {@link com.max.web.model.MaxMessage}
+     * @throws NamingException
+     * @throws JMSException
+     */
+    // TODO: validate message and sender prior to sending
+    public void sendMessage(MaxMessage msgObject) throws NamingException, JMSException, InvalidMessageException
     {
         log.debug("Request to sendMessage by MaxMessage: " + msgObject.toString());
 
         Properties properties = new Properties();
-        properties.put(Context.INITIAL_CONTEXT_FACTORY, topicSettings.getQpidIcf());
-        properties.put(topicSettings.getConnectionFactoryNamePrefix() + topicSettings.getConnectionFactoryName(), getTCPConnectionURL(topicSettings.getUserName(), topicSettings.getPassword()));
-        properties.put(topicSettings.getTopicNamePrefix() + topicName, topicName);
+        properties.put(Context.INITIAL_CONTEXT_FACTORY, getTopicSettings().getQpidIcf());
+        properties.put(getTopicSettings().getConnectionFactoryNamePrefix() + getTopicSettings().getConnectionFactoryName(), getTCPConnectionURL(getTopicSettings().getUserName(), getTopicSettings().getPassword()));
+        properties.put(getTopicSettings().getTopicNamePrefix() + getTopicSettings().getTopicName(), getTopicSettings().getTopicName());
 
         InitialContext ctx = new InitialContext(properties);
 
         // Lookup connection factory
-        TopicConnectionFactory connFactory = (TopicConnectionFactory) ctx.lookup(topicSettings.getConnectionFactoryName());
+        TopicConnectionFactory connFactory = (TopicConnectionFactory) ctx.lookup(getTopicSettings().getConnectionFactoryName());
         TopicConnection topicConnection = connFactory.createTopicConnection();
         topicConnection.start();
 
         TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
         // Send message
-        Topic topic = (Topic) ctx.lookup(topicName);
+        Topic topic = (Topic) ctx.lookup(getTopicSettings().getTopicName());
         // create the message to send
         TextMessage objectMessage = topicSession.createTextMessage(new JSONObject(msgObject).toString());
 
@@ -78,9 +75,15 @@ public class TopicPublisher
         topicConnection.close();
     }
 
+    /**
+     * Take all the properties defined in the
+     * @param objectMessage {@code javax.jms.TextMessage} High-level message on which to set metadata
+     * @param msgObject {@link com.max.web.model.MaxMessage}
+     * @throws JMSException
+     */
     private void setMessageProperties(TextMessage objectMessage, MaxMessage msgObject) throws JMSException
     {
-        Properties metaProperties = TopicFilterProperties.getMetaPropertiesForPublish(msgObject);
+        Properties metaProperties = UserActivityTopicFilterUtil.getMetaPropertiesForPublish(msgObject);
         for (Object curProperty : metaProperties.keySet())
         {
             objectMessage.setStringProperty(curProperty.toString(), metaProperties.get(curProperty).toString());
@@ -90,8 +93,10 @@ public class TopicPublisher
     private String getTCPConnectionURL(String username, String password)
     {
         // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
-        return "amqp://" + username + ":" + password + "@" +
-                topicSettings.getCarbonClientId() + "/" + topicSettings.getCarbonVirtualHostName() + "?brokerlist='tcp://" + topicSettings.getCarbonDefaultHostname() + ":" + topicSettings.getCarbonDefaultPort() + "'";
+        final String connectionUrl = "amqp://" + username + ":" + password + "@" +
+                getTopicSettings().getCarbonClientId() + "/" + getTopicSettings().getCarbonVirtualHostName() + "?brokerlist='tcp://" + getTopicSettings().getCarbonDefaultHostname() + ":" + getTopicSettings().getCarbonDefaultPort() + "'";
+        log.info("Connecting to " + connectionUrl);
+        return connectionUrl;
     }
 
 

@@ -11,6 +11,11 @@ import javax.persistence.Table;
 @Table(name = "TaskTemplate")
 public class TaskTemplate extends CoachingMaxElement
 {
+    /**
+     * A way to make a task type general, for instance the task descriptions SPONSOR_CONTACT_NEW_ASSOCIATE AND ENROLLER_CONTACT_NEW_ASSOCIATE
+     * can be classified under CONTACT_ASSOCIATE, such that when a message comes that an Associate was Contacted, the proper assigned
+     * tasks can be marked complete (as there will be no SPONSOR_CONTACTED_NEW_ASSOCIATE)
+     */
     private String taskClass;
     private String descriptionKey;
     private String url;

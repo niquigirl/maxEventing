@@ -4,27 +4,42 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
+    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter" lazy-init="false">
+        <property name="beans">
+            <map>
+                <entry key="bean:name=testBean1" value-ref="userActivitySubscriberManager"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="pubNubProperties" class="com.max.web.subscribers.WebFeedProperties">
+        <property name="webChannel" value="root"/>
+        <property name="publishKey" value="pub-c-02723478-99a6-4f63-9d74-f82e11034f59"/>
+        <property name="subscribeKey" value="sub-c-cd455cbc-a4c2-11e3-a0b1-02ee2ddab7fe"/>
+    </bean>
+    <!--<bean name="remoteSubscriberFacadeFactory" class="com.max.services.impl.RemoteSubscriberFacadeFactory"/>-->
+<!--
     <bean name="taskSubscriber" class="com.max.messaging.subscribe.impl.TaskSubscriber" init-method="register" destroy-method="doFinalize">
-        <property name="topicSettings" ref="userActivityTopicSettings"/>
-        <!--<property name="filterString" value="verb = 'LoggedIn' OR verb = 'CoachStarted' OR verb = 'WhyPhotoUploaded' OR verb = 'AssociateSignedUp' OR verb = 'ProspectAdded' OR verb = 'ProspectContacted' OR verb = 'AssociateContacted' OR verb = 'VideoWatched' OR verb = 'WhyAdded' OR verb = 'AutoShipAdded'"/>-->
+        <property name="userActivityTopicSettings" ref="userActivityTopicSettings"/>
+        <property name="filterString" value="verb = 'LoggedIn' OR verb = 'CoachStarted' OR verb = 'WhyPhotoUploaded' OR verb = 'AssociateSignedUp' OR verb = 'ProspectAdded' OR verb = 'ProspectContacted' OR verb = 'AssociateContacted' OR verb = 'VideoWatched' OR verb = 'WhyAdded' OR verb = 'AutoShipAdded'"/>
         <property name="subscriberName" value="AutoTaskFlowEngine"/>
     </bean>
-    <bean name="autoTaskFlowSubscriber" class="com.max.messaging.subscribe.impl.AutoTaskFlowSubscriber" init-method="register" destroy-method="doFinalize">
-        <property name="topicSettings" ref="userActivityTopicSettings"/>
+    <bean name="autoTaskFlowSubscriber" class="com.max.web.controller.AutoTaskFlowSubscriber" init-method="register" destroy-method="doFinalize">
+        <property name="userActivityTopicSettings" ref="userActivityTopicSettings"/>
         <property name="filterString" value="verb = 'AssociateSignedUp' OR verb = 'CoachStarted' OR verb = 'WhyAdded' OR verb = 'ProspectAdded' OR verb = 'ProspectContacted'"/>
         <property name="subscriberName" value="TaskEngine"/>
     </bean>
     <bean name="notificationSubscriber" class="com.max.messaging.subscribe.impl.NotificationSubscriber" init-method="register" destroy-method="doFinalize">
         <property name="mailService" ref="mailService"/>
-        <property name="topicSettings" ref="userActivityTopicSettings"/>
+        <property name="userActivityTopicSettings" ref="userActivityTopicSettings"/>
         <property name="filterString" value="verb = 'AssociateSignedUp' OR verb = 'ProspectAdded'"/>
         <property name="subscriberName" value="Notifier"/>
     </bean>
     <bean name="webFeedSubscriber" class="com.max.messaging.subscribe.impl.WebFeedSubscriber" init-method="register" destroy-method="doFinalize">
-        <property name="topicSettings" ref="userActivityTopicSettings"/>
+        <property name="userActivityTopicSettings" ref="userActivityTopicSettings"/>
         <property name="webChannel" value="root"/>
         <property name="subscriberName" value="PubNubPoster"/>
         <property name="publishKey" value="pub-c-02723478-99a6-4f63-9d74-f82e11034f59"/>
         <property name="subscribeKey" value="sub-c-cd455cbc-a4c2-11e3-a0b1-02ee2ddab7fe"/>
     </bean>
+-->
 </beans>

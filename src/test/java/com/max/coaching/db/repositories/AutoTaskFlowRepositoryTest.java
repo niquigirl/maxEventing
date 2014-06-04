@@ -22,13 +22,14 @@ public class AutoTaskFlowRepositoryTest extends BaseSpringInjectionUnitTest
     TaskTemplateRepository ttRepository;
 
     @Before
-    public void setup() throws Exception
+    public void setup()
     {
         TaskTemplate task = new TaskTemplate();
         task.setUrl("www.url.com");
         task.setFormUrl("www.form.com");
         task.setDetailUrl("www.detail.com");
         task.setDescriptionKey("DESC_KEY");
+        task.setTaskClass("SOME_CLASS");
 
         ttRepository.saveAndFlush(task);
 

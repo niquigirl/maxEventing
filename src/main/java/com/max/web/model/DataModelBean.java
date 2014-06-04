@@ -7,7 +7,7 @@ import com.max.coaching.db.model.CoachingMaxElement;
  *
  * A DataModelBean is intended to package data to be delivered via Web Services
  */
-public interface DataModelBean<T extends CoachingMaxElement>
+public abstract class DataModelBean<T extends CoachingMaxElement> extends JsonData
 {
-    public boolean loadFrom(T coachingMaxElement, String lang);
+    public abstract boolean loadFrom(T coachingMaxElement, String lang);
 }

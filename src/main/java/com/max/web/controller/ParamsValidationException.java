@@ -1,4 +1,4 @@
-package com.max.web.services;
+package com.max.web.controller;
 
 /**
  * Categorization of an error with Web Service request params

@@ -6,7 +6,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 
 /**
  *
- * Gather appropriate messages per division and survey usage (display template or instance)
+ * Gather appropriate messages to format the string description of the event
  */
 public class MessageUtils
 {

@@ -1,10 +1,10 @@
-package com.max.messaging.message;
+package com.max.web.model;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -13,6 +13,7 @@ import java.util.*;
 /**
  * POJO Defining the JSON structure of a Message
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MaxMessage implements Serializable
 {
     @JsonIgnore
@@ -25,6 +26,8 @@ public class MaxMessage implements Serializable
     public static final Object SUBJECT_OBJECT_TYPE = "subject.objectType";
     @JsonIgnore
     public static final Object SUBJECT_ID = "subject.objectId";
+    public static final int TEST_SUBJECT_ID = 535353;
+    public static final int TEST_ACTOR_ID = 454545;
 
     private String verb;
     private Subject object;
@@ -38,6 +41,38 @@ public class MaxMessage implements Serializable
     public MaxMessage()
     {
         super();
+    }
+
+    /**
+     * This method will generate a test instance and leave no field null
+     *
+     * @return {@code MaxMessage}
+     */
+    public static MaxMessage generateTestInstance()
+    {
+        MaxMessage message = new MaxMessage();
+        final Subject testSubject = new Subject();
+        testSubject.setObjectType("TestSubjectObjectType");
+        testSubject.setId(TEST_SUBJECT_ID);
+        final HashMap<String, String> properties = new HashMap<String, String>();
+        properties.put("SomeTestProperty", "SomeTestPropertyValue");
+        testSubject.setProperties(properties);
+
+        final Actor testActor = new Actor();
+        testActor.setId(TEST_ACTOR_ID);
+        testActor.setObjectType("TestActorType");
+        testActor.setObjectSubtype("TestActorSubType");
+        testActor.setDisplayName("TestActorDisplayName");
+
+        message.setVerb("TestVerb");
+        message.setGenerator("TestGenerator");
+        message.setLanguage("TestLang");
+        message.setProvider("TestProvider");
+        message.setPublished(new Date());
+        message.setObject(testSubject);
+        message.setActor(testActor);
+
+        return message;
     }
 
     @JsonIgnore
@@ -141,10 +176,13 @@ public class MaxMessage implements Serializable
         this.location = location;
     }
 
+    /**
+     * <p>Construct to maintain data that makes up the Actor: Assumed to be the one performing the {@link #verb}</p>
+     */
     public static class Actor
     {
+        private Integer id;
         private String objectType;
-        public Integer id;
         private String displayName;
         private String objectSubtype;
 
@@ -180,6 +218,10 @@ public class MaxMessage implements Serializable
         }
 
         @SuppressWarnings("unused")
+        /**
+         * An object subtype is intended to provide a simple hierarchy to describe an actor, such
+         * as an objectType of "User" with an objectSubtype of "Associate"
+         */
         public String getObjectSubtype()
         {
             return objectSubtype;
@@ -264,6 +306,15 @@ public class MaxMessage implements Serializable
     @Override
     public String toString()
     {
-        return new JSONObject(this).toString();
+        ObjectMapper mapper = new ObjectMapper();
+        try
+        {
+            return mapper.writeValueAsString(this);
+        }
+        catch (IOException e)
+        {
+            return "INVALID JSON";
+        }
     }
+
 }

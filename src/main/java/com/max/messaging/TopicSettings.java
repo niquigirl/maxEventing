@@ -2,7 +2,7 @@ package com.max.messaging;
 
 
 /**
- * POJO to hold all settings for a specific Topic
+ * POJO to hold all settings for each specific Topic
  */
 public class TopicSettings
 {

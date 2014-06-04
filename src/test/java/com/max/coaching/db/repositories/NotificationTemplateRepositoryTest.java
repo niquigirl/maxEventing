@@ -47,7 +47,7 @@ public class NotificationTemplateRepositoryTest extends BaseSpringInjectionUnitT
     @Test
     public void testFindByEventName()
     {
-        List<NotificationTemplate> notificationTemplates = notificationTemplateRepository.findByEventName("AssociateSignedUp");
+        List<NotificationTemplate> notificationTemplates = notificationTemplateRepository.findByEventName("SomethingHappens");
 
         assertThat(notificationTemplates).isNotEmpty();
         System.out.println("Asserted we could find notification template by event name: " + notificationTemplates.size());

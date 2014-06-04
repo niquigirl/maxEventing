@@ -9,7 +9,7 @@ import java.util.Date;
 /**
  * Web Service Data for {code AssociateTasks}
  */
-public class AssociateTaskBean implements DataModelBean<AssociateTask>
+public class AssociateTaskBean extends DataModelBean<AssociateTask>
 {
     public TaskBean task;
     public Integer associateId;
@@ -50,7 +50,7 @@ public class AssociateTaskBean implements DataModelBean<AssociateTask>
         return true;
     }
 
-    private class TaskBean implements DataModelBean<TaskTemplate>
+    private class TaskBean extends DataModelBean<TaskTemplate>
     {
         public String description;
         public String url;

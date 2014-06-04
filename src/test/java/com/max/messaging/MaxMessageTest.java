@@ -1,6 +1,6 @@
 package com.max.messaging;
 
-import com.max.messaging.message.MaxMessage;
+import com.max.web.model.MaxMessage;
 import org.json.JSONException;
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.max.messaging.subscribe.impl;
+package com.max.web.subscribers;
 
 import com.max.BaseMockUnitTest;
 import com.max.coaching.db.model.AssociateTask;
@@ -6,7 +6,7 @@ import com.max.coaching.db.model.AutoTaskFlow;
 import com.max.coaching.db.model.TaskTemplate;
 import com.max.coaching.db.repositories.AssociateTaskRepository;
 import com.max.exigo.CustomerDao;
-import com.max.messaging.message.MaxMessage;
+import com.max.web.model.MaxMessage;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 /**
  * Validate AutoTaskFlowSubscriber behavior
  */
-public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
+public class AutoTaskFlowSubscriberControllerMockTest extends BaseMockUnitTest
 {
     /**
      * Verify the proper flow is taken when we request an Associate relative to another
@@ -33,7 +33,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     @Test
     public void testGetRelatedAssociate() throws Exception
     {
-        AutoTaskFlowSubscriber atfs = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController atfs = mock(AutoTaskFlowSubscriberController.class);
         CustomerDao customerDao = mock(CustomerDao.class);
         when(atfs.getCustomerDao()).thenReturn(customerDao);
         when(atfs.getRelatedAssociateId(anyInt(), any(AutoTaskFlow.ASSIGNEE_TYPE.class))).thenCallRealMethod();
@@ -57,7 +57,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     @Test
     public void testGetRelatedEnroller() throws Exception
     {
-        AutoTaskFlowSubscriber atfs = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController atfs = mock(AutoTaskFlowSubscriberController.class);
         CustomerDao customerDao = mock(CustomerDao.class);
         when(atfs.getCustomerDao()).thenReturn(customerDao);
         when(atfs.getRelatedAssociateId(anyInt(), any(AutoTaskFlow.ASSIGNEE_TYPE.class))).thenCallRealMethod();
@@ -80,7 +80,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     @Test
     public void testGetRelatedSponsor() throws Exception
     {
-        AutoTaskFlowSubscriber atfs = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController atfs = mock(AutoTaskFlowSubscriberController.class);
         CustomerDao customerDao = mock(CustomerDao.class);
         when(atfs.getCustomerDao()).thenReturn(customerDao);
         when(atfs.getRelatedAssociateId(anyInt(), any(AutoTaskFlow.ASSIGNEE_TYPE.class))).thenCallRealMethod();
@@ -103,7 +103,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     @Test
     public void testGetRelatedUplineBronze() throws Exception
     {
-        AutoTaskFlowSubscriber atfs = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController atfs = mock(AutoTaskFlowSubscriberController.class);
         CustomerDao customerDao = mock(CustomerDao.class);
         when(atfs.getCustomerDao()).thenReturn(customerDao);
         when(atfs.getRelatedAssociateId(anyInt(), any(AutoTaskFlow.ASSIGNEE_TYPE.class))).thenCallRealMethod();
@@ -126,7 +126,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     @Test
     public void testGetRelatedUplineSilver() throws Exception
     {
-        AutoTaskFlowSubscriber atfs = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController atfs = mock(AutoTaskFlowSubscriberController.class);
         CustomerDao customerDao = mock(CustomerDao.class);
         when(atfs.getCustomerDao()).thenReturn(customerDao);
         when(atfs.getRelatedAssociateId(anyInt(), any(AutoTaskFlow.ASSIGNEE_TYPE.class))).thenCallRealMethod();
@@ -149,7 +149,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     @Test
     public void testGetRelatedUplineGold() throws Exception
     {
-        AutoTaskFlowSubscriber atfs = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController atfs = mock(AutoTaskFlowSubscriberController.class);
         CustomerDao customerDao = mock(CustomerDao.class);
         when(atfs.getCustomerDao()).thenReturn(customerDao);
         when(atfs.getRelatedAssociateId(anyInt(), any(AutoTaskFlow.ASSIGNEE_TYPE.class))).thenCallRealMethod();
@@ -188,7 +188,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
         TaskTemplate triggerTask = new TaskTemplate();
         flow.setTriggerTask(triggerTask);
 
-        AutoTaskFlowSubscriber subscriber = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController subscriber = mock(AutoTaskFlowSubscriberController.class);
         when(subscriber.createNewTask(any(AutoTaskFlow.class), any(MaxMessage.class), anyInt())).thenCallRealMethod();
 
         MaxMessage message = new MaxMessage();
@@ -227,7 +227,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
         TaskTemplate triggerTask = new TaskTemplate();
         flow.setTriggerTask(triggerTask);
 
-        AutoTaskFlowSubscriber subscriber = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController subscriber = mock(AutoTaskFlowSubscriberController.class);
         when(subscriber.createNewTask(any(AutoTaskFlow.class), any(MaxMessage.class), anyInt())).thenCallRealMethod();
 
         MaxMessage message = new MaxMessage();
@@ -257,7 +257,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     {
         AssociateTaskRepository repository = mock(AssociateTaskRepository.class);
         when(repository.findByAssociateIdAndTaskDescriptionKey(anyInt(), anyString())).thenReturn(Arrays.asList(new AssociateTask()));
-        AutoTaskFlowSubscriber subscriber = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController subscriber = mock(AutoTaskFlowSubscriberController.class);
         when(subscriber.taskShouldBeSpun(any(AutoTaskFlow.class), anyInt(), anyInt())).thenCallRealMethod();
         when(subscriber.getAssociateTaskRepository()).thenReturn(repository);
 
@@ -284,7 +284,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     {
         AssociateTaskRepository repository = mock(AssociateTaskRepository.class);
         when(repository.findByAssociateIdAndTaskDescriptionKeyAndSubjectId(anyInt(), anyString(), anyInt())).thenReturn(Arrays.asList(new AssociateTask()));
-        AutoTaskFlowSubscriber subscriber = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController subscriber = mock(AutoTaskFlowSubscriberController.class);
         when(subscriber.taskShouldBeSpun(any(AutoTaskFlow.class), anyInt(), anyInt())).thenCallRealMethod();
         when(subscriber.getAssociateTaskRepository()).thenReturn(repository);
 
@@ -312,7 +312,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     {
         AssociateTaskRepository repository = mock(AssociateTaskRepository.class);
         when(repository.findByAssociateIdAndTaskDescriptionKeyAndSubjectId(anyInt(), anyString(), anyInt())).thenReturn(Collections.<AssociateTask>emptyList());
-        AutoTaskFlowSubscriber subscriber = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController subscriber = mock(AutoTaskFlowSubscriberController.class);
         when(subscriber.taskShouldBeSpun(any(AutoTaskFlow.class), anyInt(), anyInt())).thenCallRealMethod();
         when(subscriber.getAssociateTaskRepository()).thenReturn(repository);
 
@@ -340,7 +340,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     {
         AssociateTaskRepository repository = mock(AssociateTaskRepository.class);
         when(repository.findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNotNull(anyInt(), anyString())).thenReturn(Collections.<AssociateTask>emptyList());
-        AutoTaskFlowSubscriber subscriber = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController subscriber = mock(AutoTaskFlowSubscriberController.class);
         when(subscriber.taskShouldBeSpun(any(AutoTaskFlow.class), anyInt(), anyInt())).thenCallRealMethod();
         when(subscriber.getAssociateTaskRepository()).thenReturn(repository);
 
@@ -368,7 +368,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     {
         AssociateTaskRepository repository = mock(AssociateTaskRepository.class);
         when(repository.findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNotNull(anyInt(), anyString())).thenReturn(Collections.singletonList(new AssociateTask()));
-        AutoTaskFlowSubscriber subscriber = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController subscriber = mock(AutoTaskFlowSubscriberController.class);
         when(subscriber.taskShouldBeSpun(any(AutoTaskFlow.class), anyInt(), anyInt())).thenCallRealMethod();
         when(subscriber.getAssociateTaskRepository()).thenReturn(repository);
 
@@ -396,7 +396,7 @@ public class AutoTaskFlowSubscriberMockTest extends BaseMockUnitTest
     {
         AssociateTaskRepository repository = mock(AssociateTaskRepository.class);
         when(repository.findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNotNull(anyInt(), anyString(), anyInt())).thenReturn(Collections.singletonList(new AssociateTask()));
-        AutoTaskFlowSubscriber subscriber = mock(AutoTaskFlowSubscriber.class);
+        AutoTaskFlowSubscriberController subscriber = mock(AutoTaskFlowSubscriberController.class);
         when(subscriber.taskShouldBeSpun(any(AutoTaskFlow.class), anyInt(), anyInt())).thenCallRealMethod();
         when(subscriber.getAssociateTaskRepository()).thenReturn(repository);
 

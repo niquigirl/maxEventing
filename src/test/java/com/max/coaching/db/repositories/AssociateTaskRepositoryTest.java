@@ -32,6 +32,7 @@ public class AssociateTaskRepositoryTest extends BaseSpringInjectionUnitTest
         TaskTemplate fooTemplate = new TaskTemplate();
         fooTemplate.setDescriptionKey("SOME_DESCRIPTION");
         fooTemplate.setUrl("www.url.com");
+        fooTemplate.setTaskClass("SOME_TASK_CLASS");
 
         savedTemplate = taskTemplateRepository.saveAndFlush(fooTemplate);
 

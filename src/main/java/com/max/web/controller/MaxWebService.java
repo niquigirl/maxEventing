@@ -1,5 +1,6 @@
-package com.max.web.services;
+package com.max.web.controller;
 
+import com.max.web.controller.ParamsValidationException;
 import org.apache.axis.utils.StringUtils;
 
 /**
@@ -13,7 +14,7 @@ public abstract class MaxWebService
      * @param paramName {@code String}
      * @param value {@code String}
      * @return {@code Integer} or {@code null} if value is null or empty
-     * @throws ParamsValidationException
+     * @throws com.max.web.controller.ParamsValidationException
      */
     Integer getInt(String paramName, String value) throws ParamsValidationException
     {

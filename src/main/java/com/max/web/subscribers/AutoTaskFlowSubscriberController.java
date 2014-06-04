@@ -1,4 +1,4 @@
-package com.max.messaging.subscribe.impl;
+package com.max.web.subscribers;
 
 import com.max.coaching.db.model.AssociateTask;
 import com.max.coaching.db.model.AutoTaskFlow;
@@ -7,13 +7,16 @@ import com.max.coaching.db.repositories.AssociateTaskRepository;
 import com.max.coaching.db.repositories.AutoTaskFlowRepository;
 import com.max.coaching.db.repositories.TaskTemplateRepository;
 import com.max.exigo.CustomerDao;
-import com.max.messaging.message.MaxMessage;
-import com.max.messaging.subscribe.DurableTopicSubscriber;
+import com.max.web.controller.EventTaskMapping;
+import com.max.web.model.MaxMessage;
+import com.max.web.model.HandlerResults;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -23,9 +26,10 @@ import java.util.*;
  * Basically this means that for any Task-related event, a pending Task is searched for which relates to the
  * event performed, or created if it does not already exist, and marked complete
  */
-public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
+@Controller
+public class AutoTaskFlowSubscriberController
 {
-    Logger log = Logger.getLogger(AutoTaskFlowSubscriber.class);
+    Logger log = Logger.getLogger(AutoTaskFlowSubscriberController.class);
 
     @Autowired
     AutoTaskFlowRepository autoTaskFlowRepository;
@@ -38,15 +42,37 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
     @Autowired
     EventTaskMapping eventTaskMapping;
 
-    @Override
+    @SuppressWarnings("unused")
+    @RequestMapping(value = "{version}/{lang}/{country}/testAutoTaskFlow", method = RequestMethod.POST)
+    @ResponseBody
     @Transactional
-    public void onMessage(MaxMessage message)
+    public HandlerResults onTestMessage(@PathVariable("version") String version, @PathVariable("lang") String lang, @PathVariable("country") String country,
+                                          @NotNull @RequestBody MaxMessage message)
     {
-        System.out.println("Starting AutoTaskFlowSubscriber onMessage " + this);
+        log.info("Running AutoTaskFlowSubscriberController.onTestMessage() : " + message);
+        HandlerResults results = new HandlerResults();
+        results.setMessage(message.toString());
+        results.setSuccess(true);
+
+        return results;
+    }
+
+    @SuppressWarnings("unused")
+    @RequestMapping(value = "{version}/{lang}/{country}/runAutoTaskFlow", method = RequestMethod.POST)
+    @ResponseBody
+    @Transactional
+    public HandlerResults onMessage(@PathVariable("version") String version, @PathVariable("lang") String lang, @PathVariable("country") String country,
+                                          @NotNull @RequestBody MaxMessage message)
+    {
+        log.info("Running AutoTaskFlowSubscriberController.onMessage() : " + message);
+        log.info("Starting AutoTaskFlowSubscriber onMessage " + this);
+        final HandlerResults handlerResults = new HandlerResults();
         if (message.getActor() == null || StringUtils.isBlank(message.getVerb()))
         {
             log.warn("Received a message with either no verb or no actor " + message.toString() + ".  Cannot execute AutoTaskFlow without that stuff!");
-            return;
+            handlerResults.setMessage("Received message with either no verb or no actor");
+            handlerResults.setSuccess(false);
+            return handlerResults;
         }
 
         String taskDescriptionKey = eventTaskMapping.getTaskName(message.getVerb());
@@ -86,15 +112,20 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
         // Persist newly created AssociateTasks
         if (!tasksToPersist.isEmpty())
         {
-            associateTaskRepository.save(tasksToPersist);
+            getAssociateTaskRepository().save(tasksToPersist);
         }
+
+        handlerResults.setMessage("Completed AutoTaskFlow");
+        handlerResults.setSuccess(true);
+
+        return handlerResults;
     }
 
     /**
      * Create the task per the configuration of the specified {@code AutoTaskFlow}
      *
-     * @param curFlow {@code AutoTaskFlow} in compliance of which this task is being created
-     * @param message {@code MaxMessage} which would be the message that triggered the {@code AutoTaskFlow}
+     * @param curFlow    {@code AutoTaskFlow} in compliance of which this task is being created
+     * @param message    {@code MaxMessage} which would be the message that triggered the {@code AutoTaskFlow}
      * @param assigneeId {@code Integer} ID of the associate to which to assign this task
      * @return {@code AssociateTask}
      */
@@ -178,9 +209,9 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
             List<AssociateTask> preExistingAssocTasks;
 
             if (subjectId == null)
-                preExistingAssocTasks = associateTaskRepository.findByAssociateIdAndTaskDescriptionKey(assigneeId, curFlow.getTaskToSpin().getDescriptionKey());
+                preExistingAssocTasks = getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKey(assigneeId, curFlow.getTaskToSpin().getDescriptionKey());
             else
-                preExistingAssocTasks = associateTaskRepository.findByAssociateIdAndTaskDescriptionKeyAndSubjectId(assigneeId, curFlow.getTaskToSpin().getDescriptionKey(), subjectId);
+                preExistingAssocTasks = getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKeyAndSubjectId(assigneeId, curFlow.getTaskToSpin().getDescriptionKey(), subjectId);
 
             if (!preExistingAssocTasks.isEmpty())
                 return false;
@@ -191,9 +222,9 @@ public class AutoTaskFlowSubscriber extends DurableTopicSubscriber
             List<AssociateTask> preExistingAssocTasks;
 
             if (subjectId == null)
-                preExistingAssocTasks = associateTaskRepository.findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNotNull(assigneeId, curFlow.getDependentTask().getDescriptionKey());
+                preExistingAssocTasks = getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKeyAndCompletedDateIsNotNull(assigneeId, curFlow.getDependentTask().getDescriptionKey());
             else
-                preExistingAssocTasks = associateTaskRepository.findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNotNull(assigneeId, curFlow.getDependentTask().getDescriptionKey(), subjectId);
+                preExistingAssocTasks = getAssociateTaskRepository().findByAssociateIdAndTaskDescriptionKeyAndSubjectIdAndCompletedDateIsNotNull(assigneeId, curFlow.getDependentTask().getDescriptionKey(), subjectId);
 
             if (preExistingAssocTasks.isEmpty())
                 return false;

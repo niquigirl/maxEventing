@@ -1,4 +1,4 @@
-package com.max.messaging.subscribe.impl;
+package com.max.web.controller;
 
 import java.util.Map;
 

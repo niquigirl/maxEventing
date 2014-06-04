@@ -1,4 +1,4 @@
-package com.max.web.services;
+package com.max.web.controller;
 
 import com.max.coaching.db.model.AssociateTask;
 import com.max.coaching.db.repositories.AssociateTaskRepository;

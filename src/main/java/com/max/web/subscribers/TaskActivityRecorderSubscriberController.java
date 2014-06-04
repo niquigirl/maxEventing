@@ -1,4 +1,4 @@
-package com.max.messaging.subscribe.impl;
+package com.max.web.subscribers;
 
 import com.max.coaching.db.model.AssociateTask;
 import com.max.coaching.db.model.TaskTemplate;
@@ -6,11 +6,16 @@ import com.max.coaching.db.repositories.AssociateTaskRepository;
 import com.max.coaching.db.repositories.AutoTaskFlowRepository;
 import com.max.coaching.db.repositories.TaskTemplateRepository;
 import com.max.exigo.CustomerDao;
-import com.max.messaging.message.MaxMessage;
-import com.max.messaging.subscribe.DurableTopicSubscriber;
+import com.max.web.controller.EventTaskMapping;
+import com.max.web.model.MaxMessage;
+import com.max.web.model.HandlerResults;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 /**
@@ -18,9 +23,15 @@ import java.util.*;
  * Basically this means that for any Task-related event, a pending Task is searched for which relates to the
  * event performed, or created if it does not already exist, and marked complete
  */
-public class TaskSubscriber extends DurableTopicSubscriber
+/**
+ * This subscriber deals with keeping Associates' tasks in sync with activity performed by the subscriber.
+ * Basically this means that for any Task-related event, a pending Task is searched for which relates to the
+ * event performed, or created if it does not already exist, and marked complete
+ */
+@Controller
+public class TaskActivityRecorderSubscriberController
 {
-    Logger log = Logger.getLogger(TaskSubscriber.class);
+    Logger log = Logger.getLogger(TaskActivityRecorderSubscriberController.class);
 
     @Autowired
     TaskTemplateRepository taskTemplateRepository;
@@ -33,15 +44,40 @@ public class TaskSubscriber extends DurableTopicSubscriber
     @Autowired
     EventTaskMapping eventTaskMapping;
 
-    @Override
-    public void onMessage(MaxMessage message)
+    @SuppressWarnings("unused")
+    @RequestMapping(value = "{version}/{lang}/{country}/testTaskActivityRecorder", method = RequestMethod.POST)
+    @ResponseBody
+    @Transactional
+    public HandlerResults onTestMessage(@PathVariable("version") String version, @PathVariable("lang") String lang, @PathVariable("country") String country,
+                                              @NotNull @RequestBody MaxMessage message)
     {
-        System.out.println("Starting TaskSubscriber onMessage");
+        log.info("Running TaskActivityRecorderSubscriptionController.onTestMessage : " + message);
+        HandlerResults results = new HandlerResults();
+        results.setMessage(message.toString());
+        results.setSuccess(true);
+
+        return results;
+    }
+
+    @SuppressWarnings("unused")
+    @RequestMapping(value = "{version}/{lang}/{country}/runTaskActivityRecorder", method = RequestMethod.POST)
+    @ResponseBody
+    @Transactional
+    public HandlerResults onMessage(@PathVariable("version") String version, @PathVariable("lang") String lang, @PathVariable("country") String country,
+                                          @NotNull @RequestBody MaxMessage message)
+    {
+        log.info("Running TaskActivityRecorderSubscriptionController.onMessage : " + message);
+
+        HandlerResults results = new HandlerResults();
+
         String taskDescriptionKey = getEventTaskMapping().getTaskName(message.getVerb());
         if (taskDescriptionKey == null)
         {
-            log.warn("Could not record activity for message verb " + message.getVerb() + ". Exiting process");
-            return;
+            final String failMessage = "Could not record activity for message verb " + message.getVerb() + ". Exiting process";
+            log.warn(failMessage);
+            results.setSuccess(false);
+            results.setMessage(failMessage);
+            return results;
         }
 
         AssociateTask activityRecord = getAssociateTask(message, taskDescriptionKey);
@@ -49,6 +85,11 @@ public class TaskSubscriber extends DurableTopicSubscriber
         populateCompletedData(message, activityRecord);
 
         getAssociateTaskRepository().save(activityRecord);
+
+        results.setMessage("TaskActivityRecorder complete");
+        results.setSuccess(true);
+
+        return results;
     }
 
     /**
@@ -137,3 +178,4 @@ public class TaskSubscriber extends DurableTopicSubscriber
     }
 
 }
+
