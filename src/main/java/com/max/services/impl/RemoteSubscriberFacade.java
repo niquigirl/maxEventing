@@ -8,8 +8,9 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.wso2.andes.client.message.JMSTextMessage;
 
-import com.max.web.model.MaxMessage;
+import javax.jms.JMSException;
 
 /**
  * Local subscriber serving as a facade for each registered remote subscriber
@@ -21,7 +22,6 @@ public class RemoteSubscriberFacade extends MaxMessageListener
     private Logger log = Logger.getLogger(RemoteSubscriberFacade.class);
 
     private String serviceUrl;
-    private String testUrl;
     private Integer timeoutMS;
 
     /**
@@ -29,20 +29,20 @@ public class RemoteSubscriberFacade extends MaxMessageListener
      *     Call remote service on Message received
      * </p>
      *
-     * @param maxMessage {@link com.max.web.model.MaxMessage}
+     * @param activityMessage {@link com.max.web.model.DefaultActivityMessage}
      */
     @Override
-    public HandlerResults onMessage(MaxMessage maxMessage)
+    public HandlerResults onMessage(JMSTextMessage activityMessage)
     {
-        getLogger().debug("Handling message from remote subscriber");
+        getLogger().debug(getName() + ": Handling message from remote subscriber");
         final SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setReadTimeout(getTimeoutMS() == null ? 30 : getTimeoutMS());
 
         try
         {
             RestTemplate restTemplate = new RestTemplate(requestFactory);
-            final HandlerResults handlerResults = restTemplate.postForObject(getServiceUrl(), maxMessage, HandlerResults.class);
-            final String message = "Received the following results from " + getServiceUrl() + " : " + handlerResults;
+            final HandlerResults handlerResults = restTemplate.postForObject(getServiceUrl(), activityMessage.getText(), HandlerResults.class);
+            final String message = getName() +": Received the following results from " + getServiceUrl() + " : " + handlerResults;
             getLogger().debug(message);
             return new HandlerResults(message, true);
         }
@@ -52,30 +52,14 @@ public class RemoteSubscriberFacade extends MaxMessageListener
             getLogger().error(message, e);
             return new HandlerResults(message, false);
         }
-    }
-
-    /**
-     * This method should execute some test stuff that proves connectivity is right and stuff.  Iit runs
-     */
-    @Override
-    public HandlerResults onTest(MaxMessage testMessage)
-    {
-        final SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setReadTimeout(getTimeoutMS() == null ? 30000 : getTimeoutMS());
-
-        try
+        catch (JMSException e)
         {
-            RestTemplate restTemplate = new RestTemplate(requestFactory);
-            final HandlerResults handlerResults = restTemplate.postForObject(getTestUrl(), testMessage, HandlerResults.class);
-            getLogger().debug("Received the following results from " + getTestUrl() + " : " + handlerResults);
-            return handlerResults;
-        }
-        catch (RestClientException e)
-        {
-            getLogger().error("Could not send message to remote subscriber " + getTestUrl(), e);
-            return null;
+            final String message = "Could not get message text from message " + activityMessage;
+            getLogger().error(message, e);
+            return new HandlerResults(message, false);
         }
     }
+
 
     public String getServiceUrl()
     {
@@ -97,19 +81,10 @@ public class RemoteSubscriberFacade extends MaxMessageListener
         this.timeoutMS = timeoutMS;
     }
 
-    public String getTestUrl()
-    {
-        return testUrl;
-    }
-
-    public void setTestUrl(String testUrl)
-    {
-        this.testUrl = testUrl;
-    }
-
     public Logger getLogger()
     {
         return log;
     }
+
 }
 

@@ -1,5 +1,6 @@
 package com.max.messaging;
 
+import com.max.web.model.DefaultActivityMessage;
 import com.max.web.model.MaxMessage;
 import org.json.JSONException;
 import org.junit.Test;
@@ -12,21 +13,19 @@ import static org.fest.assertions.api.Assertions.assertThat;
 /**
  * Test
  */
-public class MaxMessageTest
+public class DefaultActivityMessageTest
 {
 
     @Test
     public void validateSimpleMarshal()
     {
-        MaxMessage message = new MaxMessage();
-        final MaxMessage.Subject subject = new MaxMessage.Subject();
-        subject.setId(123);
+        DefaultActivityMessage message = new DefaultActivityMessage();
+        final DefaultActivityMessage.Subject subject = new MaxMessage.Subject();
         subject.setObjectType("Order");
-        final MaxMessage.Actor actor = new MaxMessage.Actor();
+        final DefaultActivityMessage.Actor actor = new DefaultActivityMessage.Actor();
         actor.setObjectType("User");
         actor.setObjectSubtype("Associate");
-        actor.setId(555);
-        final MaxMessage.Location location = new MaxMessage.Location();
+        final DefaultActivityMessage.Location location = new DefaultActivityMessage.Location();
         location.setLat("40.6193");
         location.setLng("-111.7895");
 
@@ -45,15 +44,14 @@ public class MaxMessageTest
 
         try
         {
-            MaxMessage result = MaxMessage.getInstance(myJson);
+            DefaultActivityMessage result = MaxMessage.getInstance(myJson);
 
             assertThat(result).isNotNull();
             assertThat(result.getVerb()).isEqualTo("Doing Something");
             assertThat(result.getLanguage()).isEqualTo("en");
             assertThat(result.getActor()).isNotNull();
-            assertThat(result.getActor().getId()).isEqualTo(123);
 
-            System.out.println("Asserted super basic things about unmarshalling a MaxMessage from JSON");
+            System.out.println("Asserted super basic things about unmarshalling a ActivityMessage from JSON");
         }
         catch (JSONException | IOException e)
         {
@@ -68,15 +66,14 @@ public class MaxMessageTest
 
         try
         {
-            MaxMessage result = MaxMessage.getInstance(myJson);
+            DefaultActivityMessage result = DefaultActivityMessage.getInstance(myJson);
 
             assertThat(result).isNotNull();
             assertThat(result.getVerb()).isEqualTo("LoggedIn");
             assertThat(result.getLanguage()).isEqualTo("en");
             assertThat(result.getActor()).isNotNull();
-            assertThat(result.getActor().getId()).isEqualTo(513683);
 
-            System.out.println("Asserted super basic things about unmarshalling a MaxMessage from JSON");
+            System.out.println("Asserted super basic things about unmarshalling a ActivityMessage from JSON");
         }
         catch (JSONException | IOException e)
         {

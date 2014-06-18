@@ -1,13 +1,11 @@
 package com.max.web.controller;
 
-import com.max.coaching.db.model.RemoteSubscriber;
-import com.max.messaging.TopicSettings;
-import com.max.messaging.publish.UserActivityTopicPublisher;
+import com.max.db.model.RemoteSubscriber;
+import com.max.messaging.MaxTopic;
 import com.max.messaging.subscribe.TopicManagementException;
 import com.max.services.InvalidSubscriberException;
-import com.max.services.SubscriberManager;
+import com.max.services.QueueManager;
 import com.max.web.model.HandlerResults;
-import com.max.web.model.MaxMessage;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,13 +22,7 @@ public class UserActivityTopicServicesController
     Logger log = Logger.getLogger(UserActivityTopicServicesController.class);
 
     @Autowired
-    UserActivityTopicPublisher userActivityUserActivityTopicPublisher;
-
-    @Autowired
-    TopicSettings userActivityTopicSettings;
-
-    @Autowired
-    SubscriberManager userActivitySubscriberManager;
+    QueueManager queueManager;
 
     /**
      * Log and return a simple String message
@@ -47,26 +39,54 @@ public class UserActivityTopicServicesController
 
 
     /**
+     * Log and return a simple String message
+     *
+     * @return {@code String} An arbitrary message
+     */
+    @RequestMapping(value = "testDIHandler", method = RequestMethod.POST)
+    @ResponseBody
+    public HandlerResults testDI(@NotNull @RequestBody String message)
+    {
+        log.debug("Test DI service hit: " + message);
+        return new HandlerResults("Test DI Handler hit: " + message, true);
+    }
+
+    /**
+     * Log and return a simple String message
+     *
+     * @return {@code String} An arbitrary message
+     */
+    @RequestMapping(value = "testUAHandler", method = RequestMethod.POST)
+    @ResponseBody
+    public HandlerResults testUA(@NotNull @RequestBody String message)
+    {
+        log.debug("Test UA service hit: " + message);
+        return new HandlerResults("Test UA Handler hit: " + message, true);
+    }
+
+
+    /**
      * Publish a message to the queue
      *
      * @param version {@code String}
      * @param lang    {@code String}
      * @param country {@code String}
-     * @param message {@link com.max.web.model.MaxMessage}
+     * @param message {@link com.max.web.model.DefaultActivityMessage}
      * @return {@link com.max.web.model.HandlerResults}
      * @throws Exception
      */
-    @RequestMapping(value = "{version}/{lang}/{country}/publish", method = RequestMethod.POST)
+    @RequestMapping(value = "{version}/{lang}/{country}/{topic}/publish", method = RequestMethod.POST)
     @ResponseBody
     @SuppressWarnings("unused")
     public HandlerResults publish(@PathVariable("version") String version, @PathVariable("lang") String lang, @PathVariable("country") String country,
-                                  @NotNull @RequestBody MaxMessage message) throws Exception
+                                  @PathVariable("topic") String topic,
+                                  @NotNull @RequestBody String message) throws Exception
     {
         log.debug("Servicing request to publish a message!!  :  " + message);
 
         try
         {
-            userActivityUserActivityTopicPublisher.sendMessage(message);
+            queueManager.sendMessage(MaxTopic.valueOf(topic), message);
         }
         catch (Exception e)
         {
@@ -82,7 +102,7 @@ public class UserActivityTopicServicesController
      * @param version    {@code String}
      * @param lang       {@code String}
      * @param country    {@code String}
-     * @param subscriber {@link com.max.coaching.db.model.RemoteSubscriber}
+     * @param subscriber {@link com.max.db.model.RemoteSubscriber}
      * @return {@link com.max.web.model.HandlerResults}
      * @throws Exception
      */
@@ -96,7 +116,7 @@ public class UserActivityTopicServicesController
 
         try
         {
-            userActivitySubscriberManager.register(subscriber);
+            queueManager.register(subscriber);
             results.setMessage("Subscriber " + subscriber.getName() + " Registered");
             results.setSuccess(true);
         }
@@ -115,7 +135,7 @@ public class UserActivityTopicServicesController
      * @param version    {@code String}
      * @param lang       {@code String}
      * @param country    {@code String}
-     * @param subscriber {@link com.max.coaching.db.model.RemoteSubscriber}
+     * @param subscriber {@link com.max.db.model.RemoteSubscriber}
      * @return {@link com.max.web.model.HandlerResults}
      * @throws Exception
      */
@@ -129,7 +149,7 @@ public class UserActivityTopicServicesController
 
         try
         {
-            userActivitySubscriberManager.unregister(subscriber);
+            queueManager.unregister(subscriber);
             results.setMessage("Subscriber " + subscriber + " unregistered");
             results.setSuccess(true);
         }

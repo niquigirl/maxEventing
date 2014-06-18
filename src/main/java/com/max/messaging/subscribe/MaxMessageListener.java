@@ -1,15 +1,11 @@
 package com.max.messaging.subscribe;
 
-import com.max.web.model.MaxMessage;
 import com.max.web.model.HandlerResults;
 import org.apache.log4j.Logger;
-import org.json.JSONException;
 import org.wso2.andes.client.message.JMSTextMessage;
 
-import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import java.io.IOException;
 
 /**
  * This should be extended by any listener, which takes the generic JMS stuff and casts it to
@@ -19,8 +15,9 @@ public abstract class MaxMessageListener implements MessageListener
 {
     Logger log = Logger.getLogger(MaxMessageListener.class);
 
-    public abstract HandlerResults onTest(MaxMessage maxMessage);
-    public abstract HandlerResults onMessage(MaxMessage maxMessage);
+    public abstract HandlerResults onMessage(JMSTextMessage activityMessage);
+
+    private String name;
 
     /**
      * Entry point for a Message.  This method casts the Message to the domain-specific type to be handled
@@ -29,28 +26,19 @@ public abstract class MaxMessageListener implements MessageListener
      */
     final public void onMessage(Message message)
     {
-        System.out.println("Starting onMessage " + this);
-        try
-        {
-            String messageText = ((JMSTextMessage) message).getText();
+        System.out.println("*********************** Responding::: Starting onMessage " + name);
+        final HandlerResults handlerResults = onMessage((JMSTextMessage) message);
 
-            try
-            {
-                MaxMessage maxMessage = MaxMessage.getInstance(messageText);
-                onMessage(maxMessage);
-            }
-            catch (JSONException e)
-            {
-                log.error("MaxMessaging - Error - Could not generate a MaxMessage from the following<br/>" + messageText, e);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        }
-        catch (JMSException e)
-        {
-            e.printStackTrace();
-        }
+        log.info("Handler " + getName() + " results: " + handlerResults);
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
     }
 }

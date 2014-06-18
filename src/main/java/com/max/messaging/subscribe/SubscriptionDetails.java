@@ -1,5 +1,7 @@
 package com.max.messaging.subscribe;
 
+import com.max.messaging.MaxTopic;
+
 /**
  * This is simply a representation of what subscription details should be
  */
@@ -8,6 +10,7 @@ public class SubscriptionDetails
     private MaxMessageListener listener;
     private String subscriberName;
     private String filterString;
+    private MaxTopic topic;
 
     public MaxMessageListener getListener()
     {
@@ -37,5 +40,15 @@ public class SubscriptionDetails
     public void setFilterString(String filterString)
     {
         this.filterString = filterString;
+    }
+
+    public MaxTopic getTopic()
+    {
+        return topic;
+    }
+
+    public void setTopic(MaxTopic topic)
+    {
+        this.topic = topic;
     }
 }

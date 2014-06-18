@@ -4,7 +4,7 @@
 
     <!-- Appenders -->
     <appender name="rollingFileAppender" class="org.apache.log4j.RollingFileAppender">
-        <param name="file" value="/var/log/maxWeb.log"/>
+        <param name="file" value="/var/log/maxqueue.log"/>
         <param name="MaxFileSize" value="20MB"/>
         <param name="MaxBackupIndex" value="1"/>
         <layout class="org.apache.log4j.PatternLayout">

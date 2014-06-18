@@ -38,7 +38,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
         "classpath:/spring/max-mvc.xml",
         "classpath:/spring/max-services.xml",
         "classpath:/spring/max-jms.xml",
-        "classpath:/spring/max-jms-subscribers.xml",
         "classpath:/spring/max-jpa.xml"
 })
 @TransactionConfiguration(transactionManager = "maxTransactionManager", defaultRollback = true)
