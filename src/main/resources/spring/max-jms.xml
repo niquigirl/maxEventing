@@ -28,7 +28,7 @@
     </bean>-->
     <!-- If there are ever any service that require some global configurable value, those would be injected here -->
 
-    <bean id="userActivityTopicSettings" class="com.max.messaging.TopicSettings">
+    <bean id="parentWSO2TopicSettings" class="com.max.messaging.TopicSettings">
         <property name="qpidIcf" value="org.wso2.andes.jndi.PropertiesFileInitialContextFactory"/>
         <property name="carbonClientId" value="carbon"/>
         <property name="carbonDefaultHostname" value="localhost"/>
@@ -37,25 +37,17 @@
         <property name="connectionFactoryName" value="andesConnectionfactory"/>
         <property name="connectionFactoryNamePrefix" value="connectionfactory."/>
         <property name="topicNamePrefix" value="topic."/>
-        <property name="topicName" value="UAT"/>
         <property name="carbonVirtualHostName" value="carbon"/>
         <property name="userName" value="admin"/>
         <property name="password" value="admin"/>
     </bean>
 
-    <bean id="dataIntegrityTopicSettings" class="com.max.messaging.TopicSettings">
-        <property name="qpidIcf" value="org.wso2.andes.jndi.PropertiesFileInitialContextFactory"/>
-        <property name="carbonClientId" value="carbon"/>
-        <property name="carbonDefaultHostname" value="localhost"/>
-        <!--<property name="carbonDefaultHostname" value="maxbussvcs.com"/>-->
-        <property name="carbonDefaultPort" value="5672"/>
-        <property name="connectionFactoryName" value="andesConnectionfactory"/>
-        <property name="connectionFactoryNamePrefix" value="connectionfactory."/>
-        <property name="topicNamePrefix" value="topic."/>
+    <bean id="userActivityTopicSettings" parent="parentWSO2TopicSettings">
+        <property name="topicName" value="UAT"/>
+    </bean>
+
+    <bean id="dataIntegrityTopicSettings" parent="parentWSO2TopicSettings">
         <property name="topicName" value="DIT"/>
-        <property name="carbonVirtualHostName" value="carbon"/>
-        <property name="userName" value="admin"/>
-        <property name="password" value="admin"/>
     </bean>
 
 </beans>
