@@ -11,6 +11,7 @@ import com.max.messaging.subscribe.TopicManagementException;
 import com.max.services.InvalidSubscriberException;
 import com.max.services.QueueManager;
 import com.max.web.model.DefaultActivityMessage;
+import com.max.web.model.RemoteSubscription;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ public class ActivityQueueManager implements QueueManager
     private static SubscriberCache cache = new SubscriberCache();
 
     /**
-     * Publish a message to the UserActivity Topic
+     * Publish a message to the Activity Topic
      *
      * @param msgObject {@link com.max.web.model.DefaultActivityMessage}
      * @throws javax.naming.NamingException
@@ -68,7 +69,7 @@ public class ActivityQueueManager implements QueueManager
     public void sendMessage(MaxTopic maxTopic, String msgObject) throws NamingException, JMSException, InvalidMessageException, IOException, JSONException
     {
         TopicSettings settings = getTopicSettings().get(maxTopic);
-        log.debug("Request to sendMessage by ActivityMessage: " + msgObject);
+        log.debug("Request to send Message to : " + maxTopic + " : "  + msgObject);
 
         Properties properties = new Properties();
         properties.put(Context.INITIAL_CONTEXT_FACTORY, settings.getQpidIcf());
@@ -156,23 +157,23 @@ public class ActivityQueueManager implements QueueManager
      * Allows us to register a single remote subscriber. This method saves the subscriber to the DB and then goes through
      * and registers all subscribers
      *
-     * @param subscriber {@link com.max.db.model.RemoteSubscriber}
+     * @param subscription {@link com.max.web.model.RemoteSubscription}
      */
-    public void register(@NotNull RemoteSubscriber subscriber) throws TopicManagementException, InvalidSubscriberException
+    public void register(@NotNull RemoteSubscription subscription) throws TopicManagementException, InvalidSubscriberException
     {
-        doRegister(subscriber);
-
         // TODO: THIS SHOULD BE PULLED OUT INTO A SERVICE THAT UNDERSTANDS THE REQUIREMENTS OF THE DB
-        RemoteSubscriber existingRecord = getRemoteSubscriberRepository().findByName(subscriber.getName());
-        if (existingRecord != null)
+        RemoteSubscriber subscriber = getRemoteSubscriberRepository().findByTopicAndName(subscription.getTopic(), subscription.getName());
+        if (subscriber != null)
         {
-            existingRecord.setAutoRegister(true);
-            existingRecord.setFilterString(subscriber.getFilterString());
+            subscriber.setAutoRegister(true);
+            subscriber.setFilterString(subscription.getFilterString());
         }
         else
-        {
-            getRemoteSubscriberRepository().save(subscriber);
-        }
+            subscriber = subscription.toData();
+
+        getRemoteSubscriberRepository().save(subscriber);
+
+        doRegister(subscriber);
     }
 
     /**
@@ -185,19 +186,20 @@ public class ActivityQueueManager implements QueueManager
      *     </ul>
      * </p>
      *
+     * @param topic {@link com.max.messaging.MaxTopic} Topic from which to unregister subscriber
      * @param subscriberName {@code String} Naming the subscriber to unregister
      * @throws TopicManagementException In the event of a failure to unregister the subscriber from the queue for any reason
      */
     @Override
-    public void unregister(@NotNull String subscriberName) throws TopicManagementException
+    public void unregister(MaxTopic topic, @NotNull String subscriberName) throws TopicManagementException
     {
-        final SubscriptionDetails subscriber = cache.getCachedSubscriber(subscriberName);
+        final SubscriptionDetails subscriber = cache.getCachedSubscriber(topic, subscriberName);
         if (subscriber != null)
         {
-            topicSubscriber.unregister(getTopicSettings().get(subscriber.getTopic()), subscriberName);
-            deactivateSubscriberInRegistry(subscriberName);
+            topicSubscriber.unregister(getTopicSettings().get(topic), subscriberName);
+            deactivateSubscriberInRegistry(topic, subscriberName);
 
-            cache.removeCachedSubscriber(subscriberName);
+            cache.removeCachedSubscriber(topic, subscriberName);
         }
     }
 
@@ -206,9 +208,9 @@ public class ActivityQueueManager implements QueueManager
      *
      * @param subscriberName {@code String} Naming the remote subscriber to remove from the registry
      */
-    private void deactivateSubscriberInRegistry(@NotNull final String subscriberName)
+    private void deactivateSubscriberInRegistry(MaxTopic topic, @NotNull final String subscriberName)
     {
-        final RemoteSubscriber remoteSubscriber = getRemoteSubscriberRepository().findByName(subscriberName);
+        final RemoteSubscriber remoteSubscriber = getRemoteSubscriberRepository().findByTopicAndName(topic, subscriberName);
         if (remoteSubscriber != null)
         {
             remoteSubscriber.setAutoRegister(false);
@@ -227,9 +229,9 @@ public class ActivityQueueManager implements QueueManager
     private void doRegister(RemoteSubscriber curSubscriber) throws InvalidSubscriberException, TopicManagementException
     {
         validateSubscriber(curSubscriber);
-        if (cache.isCached(curSubscriber.getName()))
+        if (cache.isCached(curSubscriber.getTopic(), curSubscriber.getName()))
         {
-            unregister(curSubscriber.getName());
+            unregister(curSubscriber.getTopic(), curSubscriber.getName());
         }
 
         SubscriptionDetails details = buildSubscriptionDetails(curSubscriber);
@@ -319,6 +321,7 @@ public class ActivityQueueManager implements QueueManager
         return log;
     }
 
+
     /**
      * Maintain a cache of all listeners
      */
@@ -336,7 +339,7 @@ public class ActivityQueueManager implements QueueManager
         {
             synchronized (remoteSubscribersCache)
             {
-                remoteSubscribersCache.put(subscriberName, details);
+                remoteSubscribersCache.put(composeSubscriberName(details.getTopic(), subscriberName), details);
             }
         }
 
@@ -346,11 +349,11 @@ public class ActivityQueueManager implements QueueManager
          * @param subscriberName {@code String}
          * @return {@code boolean} where true indicates the subscriber name was found in the cache
          */
-        public boolean isCached(String subscriberName)
+        public boolean isCached(MaxTopic topic, String subscriberName)
         {
             synchronized (remoteSubscribersCache)
             {
-                return remoteSubscribersCache.containsKey(subscriberName);
+                return remoteSubscribersCache.containsKey(composeSubscriberName(topic, subscriberName));
             }
         }
 
@@ -367,20 +370,25 @@ public class ActivityQueueManager implements QueueManager
             }
         }
 
-        public SubscriptionDetails getCachedSubscriber(String subscriberName)
+        public SubscriptionDetails getCachedSubscriber(MaxTopic topic, String subscriberName)
         {
             synchronized (remoteSubscribersCache)
             {
-                return remoteSubscribersCache.get(subscriberName);
+                return remoteSubscribersCache.get(composeSubscriberName(topic, subscriberName));
             }
         }
 
-        public void removeCachedSubscriber(String subscriberName)
+        public void removeCachedSubscriber(MaxTopic topic, String subscriberName)
         {
             synchronized (remoteSubscribersCache)
             {
-                remoteSubscribersCache.remove(subscriberName);
+                remoteSubscribersCache.remove(composeSubscriberName(topic, subscriberName));
             }
+        }
+
+        private String composeSubscriberName(MaxTopic topic, String subscriberName)
+        {
+            return topic.name() + "_" + subscriberName;
         }
     }
 

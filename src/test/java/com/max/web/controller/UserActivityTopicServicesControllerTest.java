@@ -2,14 +2,23 @@ package com.max.web.controller;
 
 import com.max.BaseSpringInjectionUnitTest;
 import com.max.db.model.RemoteSubscriber;
+import com.max.db.repositories.RemoteSubscriberRepository;
 import com.max.messaging.MaxTopic;
-import com.max.web.model.HandlerResults;
-import org.junit.Ignore;
+import com.max.web.model.RemoteSubscription;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
 
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test subscribe and unsubscribe
@@ -20,26 +29,59 @@ public class UserActivityTopicServicesControllerTest extends BaseSpringInjection
     @Autowired
     UserActivityTopicServicesController services;
 
+    @Autowired
+    RemoteSubscriberRepository repository;
+
+    /**
+     * This tests the sunny-day case of subscribing and unsubscribing, including asserting that:
+     * - The JSON as coming in from a web request is properly unmarshalled
+     * - When a RemoteSubscription is registered, a RemoteSubscriber record is recorded in the database,
+     *   defaulting to autoRegister (on startup)
+     * - When a subscriber unsubscribes, the RemoteSubscriber record is changed not to autoRegister
+     *
+     * @throws Exception
+     */
     @Test
     public void testSubscribe() throws Exception
     {
         String subscriberName = "TaskEngine";
-        RemoteSubscriber subscriber = new RemoteSubscriber();
+        MaxTopic topic = MaxTopic.DataIntegrity;
+
+        RemoteSubscription subscriber = new RemoteSubscription();
         subscriber.setName(subscriberName);
         subscriber.setRestUrl("http://echo.jsontest.com/message/Hi/success/true");
         subscriber.setAutoRegister(true);
-        subscriber.setTopic(MaxTopic.DataIntegrity);
+        subscriber.setTopic(topic);
+        final String subJson = new ObjectMapper().writeValueAsString(subscriber);
 
-        final HandlerResults subscribeResults = services.subscribe("", "", "", subscriber);
+        ResultActions perform = mockMvc.perform(post("/1.0/en/us/subscribe")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(subJson));
 
-        assertThat(subscribeResults.isSuccess()).isTrue();
+        perform.andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success", is(true)));
 
-        services.unsubscribe("", "", "", subscriberName);
+        RemoteSubscriber byTopicAndName = repository.findByTopicAndName(topic, subscriberName);
+        assertThat(byTopicAndName).isNotNull();
+        assertThat(byTopicAndName.isAutoRegister()).isTrue();
+
+        String requestUrl = "/1.0/en/us/DataIntegrity/unsubscribe?subscriber=" + subscriberName;
+        perform = mockMvc.perform(get(requestUrl));
+        perform.andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success", is(true)));
+
+        byTopicAndName = repository.findByTopicAndName(topic, subscriberName);
+        assertThat(byTopicAndName).isNotNull();
+        assertThat(byTopicAndName.isAutoRegister()).isFalse();
     }
+
 
     @Test
     public void testUnsubscribe() throws Exception
     {
-        services.unsubscribe("", "", "", "DefaultTester");
+        MaxTopic topic = MaxTopic.DataIntegrity;
+        services.unsubscribe("", "", "", topic, "DefaultTester");
     }
 }

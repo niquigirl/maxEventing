@@ -11,7 +11,7 @@
         <property name="topicSettings">
             <map>
                 <entry key="DataIntegrity" value-ref="dataIntegrityTopicSettings"/>
-                <entry key="UserActivity" value-ref="userActivityTopicSettings"/>
+                <entry key="Activity" value-ref="userActivityTopicSettings"/>
             </map>
         </property>
     </bean>

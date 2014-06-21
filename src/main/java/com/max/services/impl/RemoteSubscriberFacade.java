@@ -3,6 +3,8 @@ package com.max.services.impl;
 import com.max.messaging.subscribe.MaxMessageListener;
 import com.max.web.model.HandlerResults;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -36,25 +38,26 @@ public class RemoteSubscriberFacade extends MaxMessageListener
     {
         getLogger().debug(getName() + ": Handling message from remote subscriber");
         final SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setReadTimeout(getTimeoutMS() == null ? 30 : getTimeoutMS());
+        requestFactory.setReadTimeout(getTimeoutMS() == null ? 30000 : getTimeoutMS());
 
         try
         {
+            getLogger().debug("RemoteSubscriberFacade sending message: " + activityMessage.getText());
             RestTemplate restTemplate = new RestTemplate(requestFactory);
-            final HandlerResults handlerResults = restTemplate.postForObject(getServiceUrl(), activityMessage.getText(), HandlerResults.class);
+            final HandlerResults handlerResults = restTemplate.postForObject(getServiceUrl(), new JSONObject(activityMessage.getText()), HandlerResults.class);
             final String message = getName() +": Received the following results from " + getServiceUrl() + " : " + handlerResults;
             getLogger().debug(message);
             return new HandlerResults(message, true);
         }
         catch (RestClientException e)
         {
-            final String message = "Could not send message to remote subscriber URL " + getServiceUrl();
+            final String message = "Could not send message to remote subscriber URL " + getServiceUrl() + " : " + e.getMessage();
             getLogger().error(message, e);
             return new HandlerResults(message, false);
         }
-        catch (JMSException e)
+        catch (JMSException | JSONException e)
         {
-            final String message = "Could not get message text from message " + activityMessage;
+            final String message = "Could not get message text from message " + activityMessage + " : " + e.getMessage();
             getLogger().error(message, e);
             return new HandlerResults(message, false);
         }

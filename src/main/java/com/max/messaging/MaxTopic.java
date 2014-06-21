@@ -5,5 +5,5 @@ package com.max.messaging;
  */
 public enum MaxTopic
 {
-    UserActivity, DataIntegrity
+    Activity, DataIntegrity
 }

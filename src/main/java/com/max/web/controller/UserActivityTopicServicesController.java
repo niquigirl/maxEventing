@@ -1,11 +1,11 @@
 package com.max.web.controller;
 
-import com.max.db.model.RemoteSubscriber;
 import com.max.messaging.MaxTopic;
 import com.max.messaging.subscribe.TopicManagementException;
 import com.max.services.InvalidSubscriberException;
 import com.max.services.QueueManager;
 import com.max.web.model.HandlerResults;
+import com.max.web.model.RemoteSubscription;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -79,14 +79,14 @@ public class UserActivityTopicServicesController
     @ResponseBody
     @SuppressWarnings("unused")
     public HandlerResults publish(@PathVariable("version") String version, @PathVariable("lang") String lang, @PathVariable("country") String country,
-                                  @PathVariable("topic") String topic,
+                                  @PathVariable("topic") MaxTopic topic,
                                   @NotNull @RequestBody String message) throws Exception
     {
-        log.debug("Servicing request to publish a message!!  :  " + message);
+        log.debug("Servicing request to publish a message to topic: " + topic + " :  " + message);
 
         try
         {
-            queueManager.sendMessage(MaxTopic.valueOf(topic), message);
+            queueManager.sendMessage(topic, message);
         }
         catch (Exception e)
         {
@@ -110,7 +110,7 @@ public class UserActivityTopicServicesController
     @ResponseBody
     @SuppressWarnings("unused")
     public HandlerResults subscribe(@PathVariable("version") String version, @PathVariable("lang") String lang, @PathVariable("country") String country,
-                                    @NotNull @RequestBody RemoteSubscriber subscriber) throws Exception
+                                    @NotNull @RequestBody RemoteSubscription subscriber) throws Exception
     {
         HandlerResults results = new HandlerResults();
 
@@ -139,17 +139,18 @@ public class UserActivityTopicServicesController
      * @return {@link com.max.web.model.HandlerResults}
      * @throws Exception
      */
-    @RequestMapping(value = "{version}/{lang}/{country}/unsubscribe", method = RequestMethod.GET)
+    @RequestMapping(value = "{version}/{lang}/{country}/{topic}/unsubscribe", method = RequestMethod.GET)
     @ResponseBody
     @SuppressWarnings("unused")
     public HandlerResults unsubscribe(@PathVariable("version") String version, @PathVariable("lang") String lang, @PathVariable("country") String country,
+                                      @NotNull @PathVariable MaxTopic topic,
                                       @NotNull @RequestParam String subscriber) throws Exception
     {
         HandlerResults results = new HandlerResults();
 
         try
         {
-            queueManager.unregister(subscriber);
+            queueManager.unregister(topic, subscriber);
             results.setMessage("Subscriber " + subscriber + " unregistered");
             results.setSuccess(true);
         }
