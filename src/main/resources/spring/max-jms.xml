@@ -7,47 +7,25 @@
 
     <bean name="userActivityDurableTopicSubscriber" class="com.max.messaging.wso2.WSO2DurableTopicSubscriber"/>
 
-    <!--
-        MESSAGING SUBSCRIBERS
-    -->
-<!--    <bean name="eventTaskMap" class="com.max.web.controller.EventTaskMapping">
-        <property name="eventTaskMap">
-            <map key-type="java.lang.String" value-type="java.lang.String">
-                <entry key="LoggedIn" value="LOG_IN"/>
-                <entry key="CoachStarted" value="START_COACH"/>
-                <entry key="ProspectAdded" value="ADD_PROSPECT"/>
-                <entry key="ProspectContacted" value="CONTACT_PROSPECT"/>
-                <entry key="AssociateContacted" value="CONTACT_ASSOCIATE"/>
-                <entry key="VideoWatched" value="WATCH_VIDEO"/>
-                <entry key="WhyAdded" value="ENTER_YOUR_WHY"/>
-                <entry key="WhyPhotoUploaded" value="UPLOAD_WHY_PHOTO"/>
-                <entry key="AutoShipAdded" value="CREATE_AUTOSHIP"/>
-                <entry key="AssociateSignedUp" value="SIGN_UP"/>
-            </map>
-        </property>
-    </bean>-->
-    <!-- If there are ever any service that require some global configurable value, those would be injected here -->
-
     <bean id="parentWSO2TopicSettings" class="com.max.messaging.TopicSettings">
         <property name="qpidIcf" value="org.wso2.andes.jndi.PropertiesFileInitialContextFactory"/>
         <property name="carbonClientId" value="carbon"/>
-        <property name="carbonDefaultHostname" value="localhost"/>
-        <!--<property name="carbonDefaultHostname" value="maxbussvcs.com"/>-->
+        <property name="carbonDefaultHostname" value="${jms.host}"/>
         <property name="carbonDefaultPort" value="5672"/>
         <property name="connectionFactoryName" value="andesConnectionfactory"/>
         <property name="connectionFactoryNamePrefix" value="connectionfactory."/>
         <property name="topicNamePrefix" value="topic."/>
         <property name="carbonVirtualHostName" value="carbon"/>
-        <property name="userName" value="admin"/>
-        <property name="password" value="admin"/>
+        <property name="userName" value="${jms.username}"/>
+        <property name="password" value="${jms.password}"/>
     </bean>
 
     <bean id="userActivityTopicSettings" parent="parentWSO2TopicSettings">
-        <property name="topicName" value="UAT"/>
+        <property name="topicName" value="${jms.topic.activity}"/>
     </bean>
 
     <bean id="dataIntegrityTopicSettings" parent="parentWSO2TopicSettings">
-        <property name="topicName" value="DIT"/>
+        <property name="topicName" value="${jms.topic.dataintegrity}"/>
     </bean>
 
 </beans>
