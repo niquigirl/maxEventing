@@ -45,7 +45,7 @@ public class WSO2DurableTopicSubscriber implements DurableTopicSubscriber
 
         try
         {
-            log.info("Registering listener" + details.getSubscriberName());
+            log.info("-- Registering listener " + details.getSubscriberName() + " to topic " + settings.getTopicName() + " with filter string " + details.getFilterString());
             Properties properties = new Properties();
             properties.put(Context.INITIAL_CONTEXT_FACTORY, settings.getQpidIcf());
             properties.put(settings.getConnectionFactoryNamePrefix() + settings.getConnectionFactoryName(), getTCPConnectionURL(settings));
@@ -56,15 +56,11 @@ public class WSO2DurableTopicSubscriber implements DurableTopicSubscriber
             // Lookup connection factory
             TopicConnectionFactory connFactory = (TopicConnectionFactory) ctx.lookup(settings.getConnectionFactoryName());
             topicConnection = connFactory.createTopicConnection();
-//            setTopicConnection(topicConnection);
             topicConnection.start();
-//            setTopicSession(topicConnection.createTopicSession(false, QueueSession.AUTO_ACKNOWLEDGE));
             topicSession = topicConnection.createTopicSession(false, QueueSession.AUTO_ACKNOWLEDGE);
 
             // create durable subscriber with subscription ID
             Topic topic = (Topic) ctx.lookup(settings.getTopicName());
-            System.out.println("-- Registering " + details.getSubscriberName() + " with filter " + details.getFilterString());
-//            setTopicSubscriber(getTopicSession().createDurableSubscriber(topic, details.getSubscriberName(), details.getFilterString(), false));
             topicSubscriber = topicSession.createDurableSubscriber(topic, details.getSubscriberName(), details.getFilterString(), false);
 
             topicSubscriber.setMessageListener(details.getListener());
@@ -82,9 +78,10 @@ public class WSO2DurableTopicSubscriber implements DurableTopicSubscriber
         TopicConnection topicConnection;
         TopicSession topicSession;
 
+        log.info("Unregistering " + subscriberName + " from Topic " + settings.getTopicName());
+
         try
         {
-            log.info("Unregistering listener" + subscriberName);
             Properties properties = new Properties();
             properties.put(Context.INITIAL_CONTEXT_FACTORY, settings.getQpidIcf());
             properties.put(settings.getConnectionFactoryNamePrefix() + settings.getConnectionFactoryName(), getTCPConnectionURL(settings));

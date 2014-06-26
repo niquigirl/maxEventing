@@ -68,7 +68,7 @@ public class RemoteSubscriber implements Serializable
         this.timeout = timeout;
     }
 
-    public boolean isAutoRegister()
+    public boolean getAutoRegister()
     {
         return autoRegister;
     }

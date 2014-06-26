@@ -44,7 +44,7 @@ public class UserActivityTopicServicesControllerTest extends BaseSpringInjection
     @Test
     public void testSubscribe() throws Exception
     {
-        String subscriberName = "TaskEngine";
+        String subscriberName = "DefaultDITester";
         MaxTopic topic = MaxTopic.DataIntegrity;
 
         RemoteSubscription subscriber = new RemoteSubscription();
@@ -64,7 +64,7 @@ public class UserActivityTopicServicesControllerTest extends BaseSpringInjection
 
         RemoteSubscriber byTopicAndName = repository.findByTopicAndName(topic, subscriberName);
         assertThat(byTopicAndName).isNotNull();
-        assertThat(byTopicAndName.isAutoRegister()).isTrue();
+        assertThat(byTopicAndName.getAutoRegister()).isTrue();
 
         String requestUrl = "/1.0/en/us/DataIntegrity/unsubscribe?subscriber=" + subscriberName;
         perform = mockMvc.perform(get(requestUrl));
@@ -74,7 +74,7 @@ public class UserActivityTopicServicesControllerTest extends BaseSpringInjection
 
         byTopicAndName = repository.findByTopicAndName(topic, subscriberName);
         assertThat(byTopicAndName).isNotNull();
-        assertThat(byTopicAndName.isAutoRegister()).isFalse();
+        assertThat(byTopicAndName.getAutoRegister()).isFalse();
     }
 
 

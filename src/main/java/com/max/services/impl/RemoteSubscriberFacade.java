@@ -5,13 +5,10 @@ import com.max.web.model.HandlerResults;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectReader;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.wso2.andes.client.message.JMSTextMessage;
 
 import javax.jms.JMSException;
@@ -19,7 +16,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -44,7 +40,7 @@ public class RemoteSubscriberFacade extends MaxMessageListener
     @Override
     public HandlerResults onMessage(JMSTextMessage activityMessage)
     {
-        getLogger().debug(getName() + ": Handling message from remote subscriber");
+        getLogger().debug(this + " _ " + getName() + ": Handling message for remote subscriber");
         final SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setReadTimeout(getTimeoutMS() == null ? 30000 : getTimeoutMS());
 

@@ -13,7 +13,7 @@ import java.util.Properties;
  * POJO Defining the JSON structure of a Message
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DefaultActivityMessage
+public class DefaultActivityMessage extends JsonData
 {
     @JsonIgnore
     public static final String VERB = "verb";

@@ -58,71 +58,6 @@ public class ActivityQueueManager implements QueueManager
     private static SubscriberCache cache = new SubscriberCache();
 
     /**
-     * Publish a message to the Activity Topic
-     *
-     * @param msgObject {@link com.max.web.model.DefaultActivityMessage}
-     * @throws javax.naming.NamingException
-     * @throws javax.jms.JMSException
-     */
-    // TODO: validate message and sender prior to sending
-    @Override
-    public void sendMessage(MaxTopic maxTopic, String msgObject) throws NamingException, JMSException, InvalidMessageException, IOException, JSONException
-    {
-        TopicSettings settings = getTopicSettings().get(maxTopic);
-        log.debug("Request to send Message to : " + maxTopic + " : "  + msgObject);
-
-        Properties properties = new Properties();
-        properties.put(Context.INITIAL_CONTEXT_FACTORY, settings.getQpidIcf());
-        properties.put(settings.getConnectionFactoryNamePrefix() + settings.getConnectionFactoryName(), getTCPConnectionURL(settings));
-        properties.put(settings.getTopicNamePrefix() + settings.getTopicName(), settings.getTopicName());
-
-        InitialContext ctx = new InitialContext(properties);
-
-        // Lookup connection factory
-        TopicConnectionFactory connFactory = (TopicConnectionFactory) ctx.lookup(settings.getConnectionFactoryName());
-        TopicConnection topicConnection = connFactory.createTopicConnection();
-        topicConnection.start();
-
-        TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
-        // Send message
-        Topic topic = (Topic) ctx.lookup(settings.getTopicName());
-        // create the message to send
-        TextMessage objectMessage = topicSession.createTextMessage(msgObject);
-
-        setMessageProperties(objectMessage, DefaultActivityMessage.getInstance(msgObject));
-        javax.jms.TopicPublisher topicPublisher = topicSession.createPublisher(topic);
-        topicPublisher.send(objectMessage);
-        System.out.println("SENT");
-        topicPublisher.close();
-        topicSession.close();
-        topicConnection.close();
-    }
-
-    /**
-     * Take all the properties defined in the
-     * @param objectMessage {@code javax.jms.TextMessage} High-level message on which to set metadata
-     * @param msgObject {@link com.max.web.model.DefaultActivityMessage}
-     * @throws JMSException
-     */
-    private void setMessageProperties(TextMessage objectMessage, DefaultActivityMessage msgObject) throws JMSException
-    {
-        Properties metaProperties = msgObject.getMetaPropertiesForPublish();
-        for (Object curProperty : metaProperties.keySet())
-        {
-            objectMessage.setStringProperty(curProperty.toString(), metaProperties.get(curProperty).toString());
-        }
-    }
-
-    private String getTCPConnectionURL(TopicSettings settings)
-    {
-        // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
-        final String connectionUrl = "amqp://" + settings.getUserName() + ":" + settings.getPassword() + "@" +
-                settings.getCarbonClientId() + "/" + settings.getCarbonVirtualHostName() + "?brokerlist='tcp://" + settings.getCarbonDefaultHostname() + ":" + settings.getCarbonDefaultPort() + "'";
-        log.info("Connecting to " + connectionUrl);
-        return connectionUrl;
-    }
-
-    /**
      * From all RemoteSubscribers found in the data store, register a new RemoteSubscriberFacade
      */
     @PostConstruct
@@ -153,27 +88,93 @@ public class ActivityQueueManager implements QueueManager
             throw new InvalidSubscriberException(errorMessage.toString());
     }
 
+
+    /**
+     * Publish a message to the Activity Topic
+     *
+     * @param msgObject {@link com.max.web.model.DefaultActivityMessage}
+     * @throws javax.naming.NamingException
+     * @throws javax.jms.JMSException
+     */
+    @Override
+    public void sendMessage(MaxTopic maxTopic, String msgObject) throws NamingException, JMSException, InvalidMessageException, IOException, JSONException
+    {
+        TopicSettings settings = getTopicSettings().get(maxTopic);
+        log.debug("Request to send Message to : " + maxTopic + " : "  + msgObject);
+
+        sendMessage(settings, msgObject);
+    }
+
+    /**
+     * Public, but not exposed by the interface, this method should be used directly only for testing
+     *
+     * @param settings {@link com.max.messaging.TopicSettings}
+     * @param msgObject {@code String} Should be JSON
+     *
+     * @throws NamingException
+     * @throws JMSException
+     * @throws InvalidMessageException
+     * @throws IOException
+     * @throws JSONException
+     */
+    public void sendMessage(TopicSettings settings, String msgObject)  throws NamingException, JMSException, InvalidMessageException, IOException, JSONException
+    {
+        Properties properties = new Properties();
+        properties.put(Context.INITIAL_CONTEXT_FACTORY, settings.getQpidIcf());
+        properties.put(settings.getConnectionFactoryNamePrefix() + settings.getConnectionFactoryName(), getTCPConnectionURL(settings));
+        properties.put(settings.getTopicNamePrefix() + settings.getTopicName(), settings.getTopicName());
+
+        InitialContext ctx = new InitialContext(properties);
+
+        // Lookup connection factory
+        TopicConnectionFactory connFactory = (TopicConnectionFactory) ctx.lookup(settings.getConnectionFactoryName());
+        TopicConnection topicConnection = connFactory.createTopicConnection();
+        topicConnection.start();
+
+        TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
+        // Send message
+        Topic topic = (Topic) ctx.lookup(settings.getTopicName());
+        // create the message to send
+        TextMessage objectMessage = topicSession.createTextMessage(msgObject);
+
+        setMessageProperties(objectMessage, DefaultActivityMessage.getInstance(msgObject));
+        javax.jms.TopicPublisher topicPublisher = topicSession.createPublisher(topic);
+        topicPublisher.send(objectMessage);
+        System.out.println("SENT");
+        topicPublisher.close();
+        topicSession.close();
+        topicConnection.close();
+    }
+
     /**
      * Allows us to register a single remote subscriber. This method saves the subscriber to the DB and then goes through
      * and registers all subscribers
      *
      * @param subscription {@link com.max.web.model.RemoteSubscription}
      */
+    @Override
     public void register(@NotNull RemoteSubscription subscription) throws TopicManagementException, InvalidSubscriberException
     {
-        // TODO: THIS SHOULD BE PULLED OUT INTO A SERVICE THAT UNDERSTANDS THE REQUIREMENTS OF THE DB
-        RemoteSubscriber subscriber = getRemoteSubscriberRepository().findByTopicAndName(subscription.getTopic(), subscription.getName());
-        if (subscriber != null)
+        if (cache.isCached(subscription.getTopic(), subscription.getName()))
         {
-            subscriber.setAutoRegister(true);
-            subscriber.setFilterString(subscription.getFilterString());
+            unregister(subscription.getTopic(), subscription.getName());
+        }
+
+        // TODO: THIS SHOULD BE PULLED OUT INTO A SERVICE THAT UNDERSTANDS THE REQUIREMENTS OF THE DB
+        RemoteSubscriber curSubscriber = getRemoteSubscriberRepository().findByTopicAndName(subscription.getTopic(), subscription.getName());
+
+        if (curSubscriber != null)
+        {
+            validateSubscriber(curSubscriber);
+            curSubscriber.setAutoRegister(true);
+            curSubscriber.setFilterString(subscription.getFilterString());
         }
         else
-            subscriber = subscription.toData();
+            curSubscriber = subscription.toData();
 
-        getRemoteSubscriberRepository().save(subscriber);
+        getRemoteSubscriberRepository().save(curSubscriber);
 
-        doRegister(subscriber);
+        doRegister(curSubscriber);
     }
 
     /**
@@ -204,6 +205,31 @@ public class ActivityQueueManager implements QueueManager
     }
 
     /**
+     * Take all the properties defined in the
+     * @param objectMessage {@code javax.jms.TextMessage} High-level message on which to set metadata
+     * @param msgObject {@link com.max.web.model.DefaultActivityMessage}
+     * @throws JMSException
+     */
+    private void setMessageProperties(TextMessage objectMessage, DefaultActivityMessage msgObject) throws JMSException
+    {
+        Properties metaProperties = msgObject.getMetaPropertiesForPublish();
+        for (Object curProperty : metaProperties.keySet())
+        {
+            objectMessage.setStringProperty(curProperty.toString(), metaProperties.get(curProperty).toString());
+            log.debug("Set message property " + curProperty.toString() + " to " + objectMessage.getStringProperty(curProperty.toString()));
+        }
+    }
+
+    private String getTCPConnectionURL(TopicSettings settings)
+    {
+        // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
+        final String connectionUrl = "amqp://" + settings.getUserName() + ":" + settings.getPassword() + "@" +
+                settings.getCarbonClientId() + "/" + settings.getCarbonVirtualHostName() + "?brokerlist='tcp://" + settings.getCarbonDefaultHostname() + ":" + settings.getCarbonDefaultPort() + "'";
+        log.info("Connecting to " + connectionUrl);
+        return connectionUrl;
+    }
+
+    /**
      * Utility to handle "deactivating" the subscriber from the registry, meaning to set the autoRegister to false
      *
      * @param subscriberName {@code String} Naming the remote subscriber to remove from the registry
@@ -228,23 +254,8 @@ public class ActivityQueueManager implements QueueManager
      */
     private void doRegister(RemoteSubscriber curSubscriber) throws InvalidSubscriberException, TopicManagementException
     {
-        validateSubscriber(curSubscriber);
-        if (cache.isCached(curSubscriber.getTopic(), curSubscriber.getName()))
-        {
-            unregister(curSubscriber.getTopic(), curSubscriber.getName());
-        }
-
         SubscriptionDetails details = buildSubscriptionDetails(curSubscriber);
 
-/*
-        // Don't test now; we have a 'mode' that should be
-        final HandlerResults handlerResults = details.getListener().onTest(ActivityMessage.generateTestInstance());
-        if (handlerResults == null || !handlerResults.isSuccess())
-        {
-            throw new InvalidSubscriberException("Subscriber " + curSubscriber.getName() + " Failed test");
-        }
-
-*/
         cache.cacheSubscriber(curSubscriber.getName(), details);
         topicSubscriber.register(getTopicSettings().get(curSubscriber.getTopic()), details);
     }
