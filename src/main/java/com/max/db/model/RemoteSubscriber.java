@@ -1,6 +1,7 @@
 package com.max.db.model;
 
 import com.max.messaging.MaxTopic;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import javax.persistence.*;
@@ -96,5 +97,16 @@ public class RemoteSubscriber implements Serializable
     public void setTopic(MaxTopic topic)
     {
         this.topic = topic;
+    }
+
+    @Override
+    public String toString()
+    {
+        return new ToStringBuilder(this).
+                append("name", getName()).
+                append("id", getId()).
+                append("autoRegister", getAutoRegister()).
+                append("filterString", getFilterString()).
+                append("topic", getTopic()).build();
     }
 }

@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -57,10 +56,16 @@ public class ActivityQueueManager implements QueueManager
 
     private static SubscriberCache cache = new SubscriberCache();
 
+    public ActivityQueueManager(boolean autoRegisterRemoteSubscribers) throws InvalidSubscriberException
+    {
+        if (autoRegisterRemoteSubscribers)
+            registerAllManagedListeners();
+    }
+
     /**
      * From all RemoteSubscribers found in the data store, register a new RemoteSubscriberFacade
      */
-    @PostConstruct
+    @Override
     public void registerAllManagedListeners() throws InvalidSubscriberException
     {
         getLog().info("Running post construct on RemoteSubscriberFacadeFactory: " + this);

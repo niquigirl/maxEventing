@@ -10,7 +10,7 @@ import java.util.List;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
- * Created by neastman on 6/17/14.
+ * Validate injection
  */
 public class RemoteSubscriberRepositoryTest extends BaseSpringInjectionUnitTest
 {
@@ -23,5 +23,7 @@ public class RemoteSubscriberRepositoryTest extends BaseSpringInjectionUnitTest
         final List<RemoteSubscriber> all = repository.findAll();
 
         assertThat(all).isNotEmpty();
+
+        System.out.println(all);
     }
 }

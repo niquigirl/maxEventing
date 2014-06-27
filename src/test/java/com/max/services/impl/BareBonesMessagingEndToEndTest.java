@@ -6,6 +6,7 @@ import com.max.messaging.publish.InvalidMessageException;
 import com.max.messaging.subscribe.SubscriptionDetails;
 import com.max.messaging.subscribe.TopicManagementException;
 import com.max.messaging.wso2.WSO2DurableTopicSubscriber;
+import com.max.services.InvalidSubscriberException;
 import com.max.web.model.DefaultActivityMessage;
 import org.json.JSONException;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class BareBonesMessagingEndToEndTest extends BaseMockUnitTest
     public static final String TEST_SUBJECT_TYPE = "TestSubjectType";
 
     @Test
-    public void validateEndToEnd() throws TopicManagementException, IOException, JMSException, InvalidMessageException, JSONException, NamingException
+    public void validateEndToEnd() throws TopicManagementException, IOException, JMSException, InvalidMessageException, JSONException, NamingException, InvalidSubscriberException
     {
         WSO2DurableTopicSubscriber subscriber = new WSO2DurableTopicSubscriber();
 
@@ -62,7 +63,7 @@ public class BareBonesMessagingEndToEndTest extends BaseMockUnitTest
         final DefaultActivityMessage.Subject subject = new DefaultActivityMessage.Subject();
         subject.setObjectType(TEST_SUBJECT_TYPE);
         message.setObject(subject);
-        new ActivityQueueManager().sendMessage(settings, message.toString());
+        new ActivityQueueManager(false).sendMessage(settings, message.toString());
 
         try
         {
