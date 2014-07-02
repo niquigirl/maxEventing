@@ -2,25 +2,36 @@ package com.max.db.model;
 
 import com.max.messaging.MaxTopic;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
-import javax.persistence.*;
 import java.io.Serializable;
 
 /**
  * Entity bean for remote subscribers
  */
-@SuppressWarnings("unused")
-@Entity
-@Table(name = "RemoteSubscriber")
 public class RemoteSubscriber implements Serializable
 {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
     private Integer id;
+    private String name;
+    private String restUrl;
+    private String filterString;
+    private MaxTopic topic;
+    private Integer timeout;
+    private boolean autoRegister = true;
 
-    @JsonIgnore
+    public RemoteSubscriber()
+    {}
+
+    public RemoteSubscriber(Integer id, String name, String restUrl, String filterString, MaxTopic topic, Integer timeout, Boolean autoRegister)
+    {
+        this.id = id;
+        this.name = name;
+        this.restUrl = restUrl;
+        this.filterString = filterString;
+        this.topic = topic;
+        this.timeout = timeout;
+        this.autoRegister = autoRegister;
+    }
+
     public Integer getId()
     {
         return id;
@@ -30,15 +41,6 @@ public class RemoteSubscriber implements Serializable
     {
         this.id = id;
     }
-
-    private String name;
-    private String restUrl;
-    private String filterString;
-    @Enumerated(EnumType.STRING)
-    private MaxTopic topic;
-    private Integer timeout;
-    private boolean autoRegister = true;
-
     public String getName()
     {
         return name;

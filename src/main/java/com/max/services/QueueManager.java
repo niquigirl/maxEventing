@@ -4,7 +4,6 @@ import com.max.messaging.MaxTopic;
 import com.max.messaging.publish.InvalidMessageException;
 import com.max.messaging.subscribe.TopicManagementException;
 import com.max.web.model.RemoteSubscription;
-import org.json.JSONException;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
@@ -20,5 +19,5 @@ public interface QueueManager
     public void registerAllManagedListeners() throws InvalidSubscriberException;
     public void register(@NotNull RemoteSubscription subscriber) throws InvalidSubscriberException, TopicManagementException;
     public void unregister(MaxTopic topic, @NotNull String subscriberName) throws TopicManagementException;
-    public void sendMessage(MaxTopic maxTopic, String msgObject) throws NamingException, JMSException, InvalidMessageException, IOException, JSONException;
+    public void sendMessage(MaxTopic maxTopic, String msgObject) throws NamingException, JMSException, InvalidMessageException, IOException;
 }

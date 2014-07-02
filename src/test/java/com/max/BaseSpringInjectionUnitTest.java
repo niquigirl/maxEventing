@@ -35,17 +35,15 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 @ContextConfiguration(locations = {
         "classpath:/spring/max-applicationContext.xml",
-        "classpath:/spring/max-mvc.xml",
-        "classpath:/spring/max-services.xml",
-        "classpath:/spring/max-jms.xml",
-        "classpath:/spring/max-jpa.xml"
+        "classpath:/spring/max-jpa.xml",
+        "classpath:/spring/max-services.xml"
 })
-@TransactionConfiguration(transactionManager = "maxTransactionManager", defaultRollback = true)
+@TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true)
 @Transactional
-
 @WebAppConfiguration
 public abstract class BaseSpringInjectionUnitTest extends AbstractTransactionalJUnit4SpringContextTests
 {
+/*
     public static final MediaType APPLICATION_JSON_UTF8 = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(),
             Charset.forName("utf8"));
@@ -53,6 +51,7 @@ public abstract class BaseSpringInjectionUnitTest extends AbstractTransactionalJ
     public static final MediaType APPLICATION_TEXT= new MediaType(MediaType.TEXT_PLAIN.getType(),
             MediaType.TEXT_PLAIN.getSubtype(),
             Charset.forName("iso-8859-1"));
+*/
 
     protected MockMvc mockMvc;
 
@@ -66,7 +65,7 @@ public abstract class BaseSpringInjectionUnitTest extends AbstractTransactionalJ
         this.mockMvc = webAppContextSetup(this.wac).build();
     }
 
-    @Resource(name = "maxDataSource")
+    @Resource(name = "dataSource")
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }

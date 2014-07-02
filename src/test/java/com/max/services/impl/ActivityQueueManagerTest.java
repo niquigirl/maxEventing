@@ -3,7 +3,6 @@ package com.max.services.impl;
 import com.max.BaseSpringInjectionUnitTest;
 import com.max.messaging.MaxTopic;
 import com.max.messaging.publish.InvalidMessageException;
-import org.json.JSONException;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,7 +19,7 @@ public class ActivityQueueManagerTest extends BaseSpringInjectionUnitTest
     ActivityQueueManager activitySubscriberManager;
 
     @Test
-    public void sendSomething() throws IOException, JMSException, InvalidMessageException, JSONException, NamingException
+    public void sendSomething() throws IOException, JMSException, InvalidMessageException, NamingException
     {
         activitySubscriberManager.sendMessage(MaxTopic.DataIntegrity, "{\"value\":5}");
     }

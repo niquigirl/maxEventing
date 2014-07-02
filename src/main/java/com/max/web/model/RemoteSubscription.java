@@ -3,10 +3,12 @@ package com.max.web.model;
 import com.max.db.model.RemoteSubscriber;
 import com.max.messaging.MaxTopic;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * Web bean for a RemoteSubscription
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RemoteSubscription extends JsonData
 {
     private String name;

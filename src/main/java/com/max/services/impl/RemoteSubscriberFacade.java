@@ -12,11 +12,14 @@ import org.springframework.web.client.RestClientException;
 import org.wso2.andes.client.message.JMSTextMessage;
 
 import javax.jms.JMSException;
+import javax.net.ssl.*;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 
 /**
  * Local subscriber serving as a facade for each registered remote subscriber
@@ -53,7 +56,7 @@ public class RemoteSubscriberFacade extends MaxMessageListener
             getLogger().debug("JSONObject: " + request);
             final HandlerResults handlerResults = restTemplate.postForObject(getServiceUrl(), new JSONObject(activityMessage.getText()), HandlerResults.class);
 */
-            final HandlerResults handlerResults = call(getServiceUrl(), activityMessage);
+            final HandlerResults handlerResults = forwardMessage(activityMessage.getText(), getServiceUrl());
             final String message = getName() + ": Received the following results from " + getServiceUrl() + " : " + handlerResults;
             getLogger().debug(message);
             return new HandlerResults(message, true);
@@ -72,48 +75,133 @@ public class RemoteSubscriberFacade extends MaxMessageListener
         }
     }
 
-    private HandlerResults call(String serviceUrl, JMSTextMessage activityMessage)
+    /**
+     *
+     * @return
+     */
+    private HandlerResults forwardMessage(String message, String serviceUrl)
     {
         try
         {
+            final SSLSocketFactory sslSocketFactory = disableCertificateValidation();
             URL url = new URL(serviceUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            HttpsURLConnection.setFollowRedirects(true);
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            HttpURLConnection.setFollowRedirects(true);
+            conn.setSSLSocketFactory(sslSocketFactory);
+            conn.setDoInput(true);
             conn.setDoOutput(true);
-            conn.setRequestMethod("POST");
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestProperty("Content-Type", "application/json; charset=utf8");
-            conn.getOutputStream().write(activityMessage.getText().getBytes());
+            conn.setRequestMethod("POST");
+            conn.setAllowUserInteraction(false);
 
-            if (conn.getResponseCode() != 200)
+            // POST the data
+            //
+            OutputStreamWriter out = new java.io.OutputStreamWriter(conn.getOutputStream());
+            out.write(message);
+            out.flush();
+            out.close();
+
+            // read the response
+            //
+            String response;
+
+            if ((response = readResponse(conn)) != null)
             {
-                throw new RuntimeException("Failed : HTTP error code : "
-                        + conn.getResponseCode());
+                ObjectMapper mapper = new ObjectMapper();
+                final ObjectReader reader = mapper.reader(HandlerResults.class);
+
+                return reader.readValue(response);
             }
-
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    (conn.getInputStream())));
-
-            String output;
-
-            String result = "";
-            while ((output = br.readLine()) != null)
-            {
-                result = result + output;
-            }
-
-            conn.disconnect();
-
-            ObjectMapper mapper = new ObjectMapper();
-            final ObjectReader reader = mapper.reader(HandlerResults.class);
-
-            return reader.readValue(result);
         }
-        catch (IOException | JMSException e)
+        catch (Exception e)
         {
             e.printStackTrace();
+            return new HandlerResults("Could not place call to publish message: " + e.getMessage(), false);
+        }
+
+        return new HandlerResults("Not sure what the problem was, but it didn't succeed and it didn't fail in any predictable ways to publish a message", false);
+    }
+
+    /**
+     *
+     * @param con
+     * @return
+     */
+    private String readResponse(HttpURLConnection con)
+    {
+        if (con != null)
+        {
+            try
+            {
+                BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+
+                StringBuilder response = new StringBuilder();
+                String input;
+
+                while ((input = br.readLine()) != null)
+                {
+                    response.append(input);
+                }
+
+                br.close();
+
+                if (response.length() <= 0)
+                {
+                    System.err.println("Response is empty.");
+                    return null;
+                }
+
+                return response.toString();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
 
         return null;
+    }
+
+    private SSLSocketFactory disableCertificateValidation() throws Exception
+    {
+        // Create a trust manager that does not validate certificate chains
+        //
+        TrustManager[] myTrustMgr = new TrustManager[]{new X509TrustManager()
+        {
+            public X509Certificate[] getAcceptedIssuers()
+            {
+                return new X509Certificate[0];
+            }
+
+            public void checkClientTrusted(X509Certificate[] certs, String authType)
+            {
+                // ignore
+            }
+
+            public void checkServerTrusted(X509Certificate[] certs, String authType)
+            {
+                // ignore all certs
+            }
+        }};
+
+        // Install the all-trusting trust manager
+        //
+        try
+        {
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, myTrustMgr, new SecureRandom());
+            final SSLSocketFactory socketFactory = sc.getSocketFactory();
+            HttpsURLConnection.setDefaultSSLSocketFactory(socketFactory);
+
+            return socketFactory;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
 

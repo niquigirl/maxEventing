@@ -67,7 +67,7 @@ public class WSO2DurableTopicSubscriber implements DurableTopicSubscriber
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            log.debug(e.getMessage());
             throw new TopicManagementException("Failed to register listener", e);
         }
     }

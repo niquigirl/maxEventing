@@ -1,9 +1,10 @@
 package com.max.web.controller;
 
 import com.max.BaseSpringInjectionUnitTest;
+import com.max.db.dao.RemoteSubscriberDao;
 import com.max.db.model.RemoteSubscriber;
-import com.max.db.repositories.RemoteSubscriberRepository;
 import com.max.messaging.MaxTopic;
+import com.max.web.model.DefaultActivityMessage;
 import com.max.web.model.RemoteSubscription;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
@@ -26,11 +27,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 //@Ignore // Actually runs subscription and stuff, so only use it when you know what you're doing
 public class UserActivityTopicServicesControllerTest extends BaseSpringInjectionUnitTest
 {
+/*
     @Autowired
     UserActivityTopicServicesController services;
+*/
 
     @Autowired
-    RemoteSubscriberRepository repository;
+    RemoteSubscriberDao repository;
 
     /**
      * This tests the sunny-day case of subscribing and unsubscribing, including asserting that:
@@ -79,9 +82,32 @@ public class UserActivityTopicServicesControllerTest extends BaseSpringInjection
 
 
     @Test
+    public void testPublish() throws Exception
+    {
+        String subscriberName = "Foo";
+        MaxTopic topic = MaxTopic.DataIntegrity;
+
+        DefaultActivityMessage dam = new DefaultActivityMessage();
+        dam.setVerb("SomeVerb");
+        final DefaultActivityMessage.Actor someActor = new DefaultActivityMessage.Actor();
+        someActor.setObjectType("someActorObjectType");
+        someActor.setDisplayName("SeeMyType?");
+        someActor.setObjectSubtype("Subbie");
+        dam.setActor(someActor);
+        final DefaultActivityMessage.Subject someSubject = new DefaultActivityMessage.Subject();
+        someSubject.setObjectType("SomeSubjectObjectType");
+        dam.setObject(someSubject);
+
+        ResultActions perform = mockMvc.perform(post("/1.0/en/us/publish/DataIntegrity")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(dam.toString()));
+    }
+
+
+    @Test
     public void testUnsubscribe() throws Exception
     {
         MaxTopic topic = MaxTopic.DataIntegrity;
-        services.unsubscribe("", "", "", topic, "DefaultTester");
+        //services.unsubscribe("", "", "", topic, "DefaultTester");
     }
 }

@@ -1,7 +1,6 @@
 package com.max.messaging;
 
 import com.max.web.model.DefaultActivityMessage;
-import org.json.JSONException;
 import org.junit.Test;
 
 import java.io.IOException;

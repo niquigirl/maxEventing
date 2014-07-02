@@ -4,7 +4,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -26,7 +25,7 @@ public class DefaultActivityMessage extends JsonData
     private Subject object;
     private String verb;
 
-    public static DefaultActivityMessage getInstance(String json) throws JSONException, IOException
+    public static DefaultActivityMessage getInstance(String json) throws IOException
     {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES);

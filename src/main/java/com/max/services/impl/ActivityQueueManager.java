@@ -1,7 +1,7 @@
 package com.max.services.impl;
 
 import com.max.db.model.RemoteSubscriber;
-import com.max.db.repositories.RemoteSubscriberRepository;
+import com.max.db.dao.RemoteSubscriberDao;
 import com.max.messaging.MaxTopic;
 import com.max.messaging.TopicSettings;
 import com.max.messaging.publish.InvalidMessageException;
@@ -13,9 +13,10 @@ import com.max.services.QueueManager;
 import com.max.web.model.DefaultActivityMessage;
 import com.max.web.model.RemoteSubscription;
 import org.apache.log4j.Logger;
-import org.json.JSONException;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.StringUtils;
 
 import javax.jms.*;
@@ -36,17 +37,15 @@ import java.util.*;
  * as listeners
  * </p>
  */
-public class ActivityQueueManager implements QueueManager
+public class ActivityQueueManager implements QueueManager, ApplicationContextAware
 {
     public static final int DEFAULT_TIMEOUT = 30000;
     public static final String REMOTE_SUBSCRIBER_FACADE = "remoteSubscriberFacade";
 
     Logger log = Logger.getLogger(ActivityQueueManager.class);
 
-    @Autowired
-    RemoteSubscriberRepository remoteSubscriberRepository;
+    RemoteSubscriberDao remoteSubscriberDao;
 
-    @Autowired
     ApplicationContext applicationContext;
 
     @Autowired
@@ -54,22 +53,25 @@ public class ActivityQueueManager implements QueueManager
 
     Map<MaxTopic, TopicSettings> topicSettings;
 
+    private boolean autoRegisterRemoteSubscribers;
+
     private static SubscriberCache cache = new SubscriberCache();
 
-    public ActivityQueueManager(boolean autoRegisterRemoteSubscribers) throws InvalidSubscriberException
+    public ActivityQueueManager(RemoteSubscriberDao remoteSubscriberDao, boolean autoRegisterRemoteSubscribers) throws InvalidSubscriberException
     {
-        if (autoRegisterRemoteSubscribers)
-            registerAllManagedListeners();
+        this.remoteSubscriberDao = remoteSubscriberDao;
+        this.autoRegisterRemoteSubscribers = autoRegisterRemoteSubscribers;
     }
 
     /**
      * From all RemoteSubscribers found in the data store, register a new RemoteSubscriberFacade
      */
     @Override
-    public void registerAllManagedListeners() throws InvalidSubscriberException
+    public void registerAllManagedListeners()
     {
-        getLog().info("Running post construct on RemoteSubscriberFacadeFactory: " + this);
-        final Collection<RemoteSubscriber> remoteSubscribers = getRemoteSubscriberRepository().findByAutoRegister(true);
+        getLog().info("Registering managed listeners: " + this);
+
+        final Collection<RemoteSubscriber> remoteSubscribers = getRemoteSubscriberDao().findByAutoRegister(true);
 
         StringBuilder errorMessage = new StringBuilder("Failures when attempting to register all listeners from the registry:");
         boolean hasErrors = false;
@@ -90,7 +92,9 @@ public class ActivityQueueManager implements QueueManager
         printStats();
 
         if (hasErrors)
-            throw new InvalidSubscriberException(errorMessage.toString());
+        {
+            log.error("Failure to register subscribers on startup: " + errorMessage);
+        }
     }
 
 
@@ -102,7 +106,7 @@ public class ActivityQueueManager implements QueueManager
      * @throws javax.jms.JMSException
      */
     @Override
-    public void sendMessage(MaxTopic maxTopic, String msgObject) throws NamingException, JMSException, InvalidMessageException, IOException, JSONException
+    public void sendMessage(MaxTopic maxTopic, String msgObject) throws NamingException, JMSException, InvalidMessageException, IOException
     {
         TopicSettings settings = getTopicSettings().get(maxTopic);
         log.debug("Request to send Message to : " + maxTopic + " : "  + msgObject);
@@ -120,9 +124,8 @@ public class ActivityQueueManager implements QueueManager
      * @throws JMSException
      * @throws InvalidMessageException
      * @throws IOException
-     * @throws JSONException
      */
-    public void sendMessage(TopicSettings settings, String msgObject)  throws NamingException, JMSException, InvalidMessageException, IOException, JSONException
+    public void sendMessage(TopicSettings settings, String msgObject)  throws NamingException, JMSException, InvalidMessageException, IOException
     {
         Properties properties = new Properties();
         properties.put(Context.INITIAL_CONTEXT_FACTORY, settings.getQpidIcf());
@@ -166,7 +169,7 @@ public class ActivityQueueManager implements QueueManager
         }
 
         // TODO: THIS SHOULD BE PULLED OUT INTO A SERVICE THAT UNDERSTANDS THE REQUIREMENTS OF THE DB
-        RemoteSubscriber curSubscriber = getRemoteSubscriberRepository().findByTopicAndName(subscription.getTopic(), subscription.getName());
+        RemoteSubscriber curSubscriber = getRemoteSubscriberDao().findByTopicAndName(subscription.getTopic(), subscription.getName());
 
         if (curSubscriber != null)
         {
@@ -177,7 +180,7 @@ public class ActivityQueueManager implements QueueManager
         else
             curSubscriber = subscription.toData();
 
-        getRemoteSubscriberRepository().save(curSubscriber);
+        getRemoteSubscriberDao().save(curSubscriber);
 
         doRegister(curSubscriber);
     }
@@ -236,16 +239,17 @@ public class ActivityQueueManager implements QueueManager
 
     /**
      * Utility to handle "deactivating" the subscriber from the registry, meaning to set the autoRegister to false
+     * TODO: could do this directly in SQL as an update statement
      *
      * @param subscriberName {@code String} Naming the remote subscriber to remove from the registry
      */
     private void deactivateSubscriberInRegistry(MaxTopic topic, @NotNull final String subscriberName)
     {
-        final RemoteSubscriber remoteSubscriber = getRemoteSubscriberRepository().findByTopicAndName(topic, subscriberName);
+        final RemoteSubscriber remoteSubscriber = getRemoteSubscriberDao().findByTopicAndName(topic, subscriberName);
         if (remoteSubscriber != null)
         {
             remoteSubscriber.setAutoRegister(false);
-            getRemoteSubscriberRepository().save(remoteSubscriber);
+            getRemoteSubscriberDao().save(remoteSubscriber);
         }
     }
 
@@ -261,8 +265,15 @@ public class ActivityQueueManager implements QueueManager
     {
         SubscriptionDetails details = buildSubscriptionDetails(curSubscriber);
 
-        cache.cacheSubscriber(curSubscriber.getName(), details);
-        topicSubscriber.register(getTopicSettings().get(curSubscriber.getTopic()), details);
+        if (details != null)
+        {
+            cache.cacheSubscriber(curSubscriber.getName(), details);
+            topicSubscriber.register(getTopicSettings().get(curSubscriber.getTopic()), details);
+        }
+        else
+        {
+            throw new InvalidSubscriberException("Actually, something's gone wrong with the plumbing");
+        }
     }
 
     /**
@@ -302,6 +313,8 @@ public class ActivityQueueManager implements QueueManager
     {
         RemoteSubscriberFacade curFacade = generateRemoteSubscriber(curSubscriber);
 
+        if (curFacade == null)
+            return null;
         SubscriptionDetails details = new SubscriptionDetails();
         details.setListener(curFacade);
         details.setFilterString(curSubscriber.getFilterString());
@@ -327,14 +340,27 @@ public class ActivityQueueManager implements QueueManager
         return curFacade;
     }
 
-    public RemoteSubscriberRepository getRemoteSubscriberRepository()
+    public RemoteSubscriberDao getRemoteSubscriberDao()
     {
-        return remoteSubscriberRepository;
+        return remoteSubscriberDao;
     }
 
     public Logger getLog()
     {
         return log;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException
+    {
+        this.applicationContext = applicationContext;
+
+        if (autoRegisterRemoteSubscribers)
+        {
+            registerAllManagedListeners();
+        }
+
+        log.info("Successfully completed starting app");
     }
 
 

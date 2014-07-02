@@ -2,11 +2,13 @@
 <web-app
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://java.sun.com/xml/ns/javaee"
-        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="maxeventing" version="3.0">
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+        id="maxevents" version="3.0">
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:spring/max-*.xml
+        <param-value>classpath:spring/max-applicationContext.xml, classpath:spring/max-jpa.xml,
+            classpath:spring/max-services.xml
         </param-value>
     </context-param>
 
@@ -14,34 +16,86 @@
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
-    <!-- The front controller of this Spring Web application, responsible for handling all application requests -->
     <servlet>
-        <servlet-name>Spring MVC Dispatcher Servlet</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <init-param>
-            <param-name>contextConfigLocation</param-name>
-            <param-value>classpath:/spring/max-mvc.xml</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
+        <servlet-name>TesterServlet</servlet-name>
+        <servlet-class>com.max.web.controller.TestWiringServlet</servlet-class>
     </servlet>
 
-    <!-- Map all requests to the DispatcherServlet for handling -->
     <servlet-mapping>
-        <servlet-name>Spring MVC Dispatcher Servlet</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <servlet-name>TesterServlet</servlet-name>
+        <url-pattern>/testme</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>SeeSubscribersServlet</servlet-name>
+        <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>SeeSubscribersServlet</servlet-name>
+        <url-pattern>/seeSubscribers</url-pattern>
     </servlet-mapping>
 
-    <!--    <security-constraint>
-            <web-resource-collection>
-                <web-resource-name>maxeventing</web-resource-name>
-                <url-pattern>/*</url-pattern>
-            </web-resource-collection>
+        <servlet>
+            <servlet-name>PublishMessageServlet</servlet-name>
+            <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+        </servlet>
 
-            <user-data-constraint>
-                <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-            </user-data-constraint>
-    </security-constraint>
+        <servlet-mapping>
+            <servlet-name>PublishMessageServlet</servlet-name>
+            <url-pattern>/1.0/en/us/publish/*</url-pattern>
+        </servlet-mapping>
+
+        <servlet>
+            <servlet-name>SubscribeServlet</servlet-name>
+            <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+        </servlet>
+
+        <servlet-mapping>
+            <servlet-name>SubscribeServlet</servlet-name>
+            <url-pattern>/1.0/en/us/subscribe</url-pattern>
+        </servlet-mapping>
+
+        <servlet>
+            <servlet-name>UnsubscribeServlet</servlet-name>
+            <servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+        </servlet>
+
+        <servlet-mapping>
+            <servlet-name>UnsubscribeServlet</servlet-name>
+            <url-pattern>/1.0/en/us/unsubscribe/*</url-pattern>
+        </servlet-mapping>
+
+    <!-- The front controller of this Spring Web application, responsible for handling all application requests -->
+    <!--
+        <servlet>
+            <servlet-name>Spring MVC Dispatcher Servlet</servlet-name>
+            <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+            <init-param>
+                <param-name>contextConfigLocation</param-name>
+                <param-value>classpath:/spring/max-mvc.xml</param-value>
+            </init-param>
+            <load-on-startup>1</load-on-startup>
+        </servlet>
+
+        &lt;!&ndash; Map all requests to the DispatcherServlet for handling &ndash;&gt;
+        <servlet-mapping>
+            <servlet-name>Spring MVC Dispatcher Servlet</servlet-name>
+            <url-pattern>/srv/*</url-pattern>
+        </servlet-mapping>
     -->
+
+<!--
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>maxevents</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+-->
 
     <!--
         <filter>

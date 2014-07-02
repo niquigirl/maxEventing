@@ -21,7 +21,7 @@
 
     <!-- Application Loggers -->
 
-    <logger name="com.max">
+    <logger name="com">
         <level value="trace" />
     </logger>
 
