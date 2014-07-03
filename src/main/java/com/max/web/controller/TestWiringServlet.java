@@ -1,6 +1,6 @@
 package com.max.web.controller;
 
-import com.max.services.QueueManager;
+import com.max.web.model.HandlerResults;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
@@ -34,6 +34,7 @@ public class TestWiringServlet extends HttpServlet
         log.info("Received the following message: " + body);
 
 
-        resp.getWriter().write("You hit something!");
+        HandlerResults results = new HandlerResults("Tested, Approved!", true);
+        resp.getWriter().write(results.toString());
     }
 }

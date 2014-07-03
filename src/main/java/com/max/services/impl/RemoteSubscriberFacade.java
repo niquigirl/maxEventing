@@ -1,7 +1,8 @@
 package com.max.services.impl;
 
-import com.max.messaging.subscribe.MaxMessageListener;
+import com.max.services.MaxMessageListener;
 import com.max.web.model.HandlerResults;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectReader;
@@ -14,10 +15,12 @@ import org.wso2.andes.client.message.JMSTextMessage;
 import javax.jms.JMSException;
 import javax.net.ssl.*;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
@@ -76,67 +79,108 @@ public class RemoteSubscriberFacade extends MaxMessageListener
     }
 
     /**
+     * Front method to determine how to call the registrar's service Url and call the appropriate method
+     * depending on the URL protocol
      *
-     * @return
+     * @return {@link com.max.web.model.HandlerResults}
      */
     private HandlerResults forwardMessage(String message, String serviceUrl)
     {
         try
         {
-            final SSLSocketFactory sslSocketFactory = disableCertificateValidation();
             URL url = new URL(serviceUrl);
-            HttpsURLConnection.setFollowRedirects(true);
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-            HttpURLConnection.setFollowRedirects(true);
-            conn.setSSLSocketFactory(sslSocketFactory);
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestProperty("Content-Type", "application/json; charset=utf8");
-            conn.setRequestMethod("POST");
-            conn.setAllowUserInteraction(false);
 
-            // POST the data
-            //
-            OutputStreamWriter out = new java.io.OutputStreamWriter(conn.getOutputStream());
-            out.write(message);
-            out.flush();
-            out.close();
+            HttpURLConnection conn;
 
-            // read the response
-            //
-            String response;
-
-            if ((response = readResponse(conn)) != null)
+            if (url.getProtocol().equalsIgnoreCase("https"))
             {
-                ObjectMapper mapper = new ObjectMapper();
-                final ObjectReader reader = mapper.reader(HandlerResults.class);
-
-                return reader.readValue(response);
+                final SSLSocketFactory sslSocketFactory = disableCertificateValidation();
+                conn = (HttpsURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
             }
+            else
+            {
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+            }
+
+            String response = forwardMessage(conn, message);
+            conn.disconnect();
+
+            return getHandlerResults(url, response);
         }
         catch (Exception e)
         {
             e.printStackTrace();
             return new HandlerResults("Could not place call to publish message: " + e.getMessage(), false);
         }
-
-        return new HandlerResults("Not sure what the problem was, but it didn't succeed and it didn't fail in any predictable ways to publish a message", false);
     }
 
     /**
+     * Push the message through to the opened connection
      *
-     * @param con
-     * @return
+     * @param conn {@code URLConnection}
+     * @param message {@code String}
+     * @return {@code String} which is assumed to be a stringified JSON object
+     * @throws Exception
      */
-    private String readResponse(HttpURLConnection con)
+    private String forwardMessage(URLConnection conn, String message) throws Exception
     {
-        if (con != null)
+        HttpURLConnection.setFollowRedirects(true);
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
+        conn.setAllowUserInteraction(false);
+        conn.setRequestProperty("Accept", "application/json");
+        conn.setRequestProperty("Content-Type", "application/json; charset=utf8");
+
+        try (OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream()))
+        {
+            out.write(message);
+            out.flush();
+        }
+
+        return readResponse(conn);
+    }
+
+    /**
+     * Parse a {@link com.max.web.model.HandlerResults} from the String provided
+     *
+     * @param url {@code URL}
+     * @param result {@code STring}
+     * @return {@link com.max.web.model.HandlerResults}
+     */
+    private HandlerResults getHandlerResults(URL url, String result)
+    {
+        if (!StringUtils.isBlank(result))
         {
             try
             {
-                BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                ObjectMapper mapper = new ObjectMapper();
+                final ObjectReader reader = mapper.reader(HandlerResults.class);
 
+                return reader.readValue(result);
+            }
+            catch (IOException e)
+            {
+                log.warn("IOException attempting to deserialize results from " + url.toString() + ".  <result>" + result + "</result>");
+            }
+        }
+
+        return new HandlerResults("Could not deserialize results from " + url.toString() + ".  <result>" + result + "</result>", false);
+    }
+
+    /**
+     * Read the response from a call to forward a message to the registrar's service Url
+     *
+     * @param con {@code HttpURLConnection}
+     * @return String which may be {@code null} representing an empty or no response
+     */
+    private String readResponse(URLConnection con)
+    {
+        if (con != null)
+        {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream())))
+            {
                 StringBuilder response = new StringBuilder();
                 String input;
 
@@ -145,15 +189,7 @@ public class RemoteSubscriberFacade extends MaxMessageListener
                     response.append(input);
                 }
 
-                br.close();
-
-                if (response.length() <= 0)
-                {
-                    System.err.println("Response is empty.");
-                    return null;
-                }
-
-                return response.toString();
+                return response.length() <= 0 ? null : response.toString();
             }
             catch (Exception e)
             {

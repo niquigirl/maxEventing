@@ -372,7 +372,7 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
         private final HashMap<String, SubscriptionDetails> remoteSubscribersCache = new HashMap<>();
 
         /**
-         * Cache a {@link com.max.messaging.subscribe.MaxMessageListener} under the subscriber name
+         * Cache a {@link com.max.services.MaxMessageListener} under the subscriber name
          *
          * @param subscriberName {@code String}
          * @param details {@link com.max.messaging.subscribe.SubscriptionDetails}

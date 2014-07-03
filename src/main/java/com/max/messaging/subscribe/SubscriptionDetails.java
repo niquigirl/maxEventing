@@ -1,6 +1,7 @@
 package com.max.messaging.subscribe;
 
 import com.max.messaging.MaxTopic;
+import com.max.services.MaxMessageListener;
 
 /**
  * This is simply a representation of what subscription details should be

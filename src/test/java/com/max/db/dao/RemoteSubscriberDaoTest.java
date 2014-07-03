@@ -34,4 +34,12 @@ public class RemoteSubscriberDaoTest extends BaseSpringInjectionUnitTest
 
         assertThat(dao.delete(saved)).isTrue();
     }
+
+    @Test
+    public void testFindByTopicAndName()
+    {
+        final RemoteSubscriber testSubscriber = dao.findByTopicAndName(MaxTopic.DataIntegrity, "TestSubscriber");
+
+        System.out.println("Is null? " + testSubscriber);
+    }
 }

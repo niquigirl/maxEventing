@@ -36,8 +36,17 @@ public class RemoteSubscriberDao
     @Transactional
     public boolean save(RemoteSubscriber subscriber)
     {
-        String getSubscribersSql = "insert into RemoteSubscriber(restUrl, timeout, name, autoRegister, topic, filterString) " +
+        String getSubscribersSql;
+
+        if (subscriber.getId() == null)
+        {
+            getSubscribersSql = "insert into RemoteSubscriber(restUrl, timeout, name, autoRegister, topic, filterString) " +
                 "values (?, ?, ?, ?, ?, ?)";
+        }
+        else
+        {
+            getSubscribersSql = "update RemoteSubscriber set restUrl=?, timeout=?, name=?, autoRegister=?, topic=?, filterString=? where id=?";
+        }
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement getSubscribersPS = connection.prepareStatement(getSubscribersSql))
@@ -45,9 +54,12 @@ public class RemoteSubscriberDao
             getSubscribersPS.setString(1, subscriber.getRestUrl());
             getSubscribersPS.setInt(2, subscriber.getTimeout());
             getSubscribersPS.setString(3, subscriber.getName());
-            getSubscribersPS.setBoolean(4, subscriber.getAutoRegister());
+            getSubscribersPS.setInt(4, subscriber.getAutoRegister() ? 1 : 0); // TODO: test this
             getSubscribersPS.setString(5, subscriber.getTopic().name());
             getSubscribersPS.setString(6, subscriber.getFilterString());
+
+            if (subscriber.getId() != null)
+                getSubscribersPS.setInt(7, subscriber.getId());
 
             final int i = getSubscribersPS.executeUpdate();
             return i == 1;

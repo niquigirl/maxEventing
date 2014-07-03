@@ -1,4 +1,4 @@
-package com.max.messaging.subscribe;
+package com.max.services;
 
 import com.max.web.model.HandlerResults;
 import org.apache.log4j.Logger;
