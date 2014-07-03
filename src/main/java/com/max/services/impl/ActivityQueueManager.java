@@ -63,40 +63,6 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
         this.autoRegisterRemoteSubscribers = autoRegisterRemoteSubscribers;
     }
 
-    /**
-     * From all RemoteSubscribers found in the data store, register a new RemoteSubscriberFacade
-     */
-    @Override
-    public void registerAllManagedListeners()
-    {
-        getLog().info("Registering managed listeners: " + this);
-
-        final Collection<RemoteSubscriber> remoteSubscribers = getRemoteSubscriberDao().findByAutoRegister(true);
-
-        StringBuilder errorMessage = new StringBuilder("Failures when attempting to register all listeners from the registry:");
-        boolean hasErrors = false;
-
-        for (RemoteSubscriber curSubscriber : remoteSubscribers)
-        {
-            try
-            {
-                doRegister(curSubscriber);
-            }
-            catch (InvalidSubscriberException | TopicManagementException e)
-            {
-                errorMessage.append(e.getMessage()).append(" | ");
-                hasErrors = true;
-            }
-        }
-
-        printStats();
-
-        if (hasErrors)
-        {
-            log.error("Failure to register subscribers on startup: " + errorMessage);
-        }
-    }
-
 
     /**
      * Publish a message to the Activity Topic
@@ -267,12 +233,12 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
 
         if (details != null)
         {
-            cache.cacheSubscriber(curSubscriber.getName(), details);
             topicSubscriber.register(getTopicSettings().get(curSubscriber.getTopic()), details);
+            cache.cacheSubscriber(curSubscriber.getName(), details);
         }
         else
         {
-            throw new InvalidSubscriberException("Actually, something's gone wrong with the plumbing");
+            throw new InvalidSubscriberException("Couldn't build subscription details");
         }
     }
 
@@ -357,12 +323,67 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
 
         if (autoRegisterRemoteSubscribers)
         {
-            registerAllManagedListeners();
+            new Thread(new SubscriberAutoRegistrar()).start();
         }
 
         log.info("Successfully completed starting app");
     }
 
+    class SubscriberAutoRegistrar implements Runnable
+    {
+
+        @Override
+        public void run()
+        {
+            while (!Thread.interrupted())
+            {
+                try
+                {
+                    Thread.sleep(60000);
+                }
+                catch (InterruptedException e)
+                {
+                    // Don't care
+                }
+
+                registerAllManagedListeners();
+            }
+        }
+
+        /**
+         * From all RemoteSubscribers found in the data store, register a new RemoteSubscriberFacade
+         */
+        public void registerAllManagedListeners()
+        {
+            getLog().info("Running AutoRegister for managed listeners: " + this);
+
+            final Collection<RemoteSubscriber> remoteSubscribers = getRemoteSubscriberDao().findByAutoRegister(true);
+
+            StringBuilder errorMessage = new StringBuilder("Failures when attempting to register all listeners from the registry:");
+            boolean hasErrors = false;
+
+            for (RemoteSubscriber curSubscriber : remoteSubscribers)
+            {
+                try
+                {
+                    if (!cache.isCached(curSubscriber.getTopic(), curSubscriber.getName()))
+                        doRegister(curSubscriber);
+                }
+                catch (InvalidSubscriberException | TopicManagementException e)
+                {
+                    errorMessage.append(e.getMessage()).append(" | ");
+                    hasErrors = true;
+                }
+            }
+
+            if (hasErrors)
+            {
+                log.error("Failure to register subscribers on startup: " + errorMessage);
+            }
+        }
+
+
+    }
 
     /**
      * Maintain a cache of all listeners

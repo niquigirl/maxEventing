@@ -16,7 +16,7 @@ import java.io.IOException;
 public interface QueueManager
 {
     @SuppressWarnings("unused")
-    public void registerAllManagedListeners() throws InvalidSubscriberException;
+//    public void registerAllManagedListeners() throws InvalidSubscriberException;
     public void register(@NotNull RemoteSubscription subscriber) throws InvalidSubscriberException, TopicManagementException;
     public void unregister(MaxTopic topic, @NotNull String subscriberName) throws TopicManagementException;
     public void sendMessage(MaxTopic maxTopic, String msgObject) throws NamingException, JMSException, InvalidMessageException, IOException;

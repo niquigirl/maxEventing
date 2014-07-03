@@ -29,6 +29,15 @@
     <bean id="dataIntegrityTopicSettings" parent="parentWSO2TopicSettings">
         <property name="topicName" value="${jms.topic.dataintegrity}"/>
     </bean>
+
+    <bean id="testUserActivityTopicSettings" parent="parentWSO2TopicSettings">
+        <property name="topicName" value="${jms.topic.activity.test}"/>
+    </bean>
+
+    <bean id="testDataIntegrityTopicSettings" parent="parentWSO2TopicSettings">
+        <property name="topicName" value="${jms.topic.dataintegrity.test}"/>
+    </bean>
+
     <bean id="activitySubscriberManager" class="com.max.services.impl.ActivityQueueManager">
         <constructor-arg ref="remoteSubscriberDao"/>
         <constructor-arg value="${autoregisterremotesubscribers}"/>
@@ -36,6 +45,8 @@
             <map>
                 <entry key="DataIntegrity" value-ref="dataIntegrityTopicSettings"/>
                 <entry key="Activity" value-ref="userActivityTopicSettings"/>
+                <entry key="Activity_test" value-ref="testUserActivityTopicSettings"/>
+                <entry key="DataIntegrity_test" value-ref="testDataIntegrityTopicSettings"/>
             </map>
         </property>
     </bean>
