@@ -355,8 +355,6 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
          */
         public void registerAllManagedListeners()
         {
-            getLog().info("Running AutoRegister for managed listeners: " + this);
-
             final Collection<RemoteSubscriber> remoteSubscribers = getRemoteSubscriberDao().findByAutoRegister(true);
 
             StringBuilder errorMessage = new StringBuilder("Failures when attempting to register all listeners from the registry:");
