@@ -21,14 +21,12 @@ import static org.mockito.Mockito.mock;
  * Tests Bare-bones end-to-end messaging - registering a subscriber, sending/receiving a message.
  * Should use to validate property setting (e.g. filterable properties such as verb) and filter strings
  */
-public class BareBonesMessagingEndToEndTest extends BaseMockUnitTest
+public class BareBonesWSO2EndToEndTest extends BaseMockUnitTest
 {
 
     public static final String SUBSCRIBER_NAME = "StandAloneTester";
     public static final String TESTER_SERVICE_URL = "http://echo.jsontest.com/message/Hi/success/true";
-    public static final String TOPIC_NAME = "StandaloneTesting";
     public static final String TEST_VERB_1 = "Verb1";
-    public static final String TEST_VERB_2 = "Verb2";
     public static final String TEST_SUBJECT_TYPE = "TestSubjectType";
 
     @Test
@@ -37,20 +35,22 @@ public class BareBonesMessagingEndToEndTest extends BaseMockUnitTest
         WSO2DurableTopicSubscriber subscriber = new WSO2DurableTopicSubscriber();
 
         final TopicSettings settings = new TopicSettings();
-        settings.setCarbonClientId("carbon");
-//        settings.setCarbonDefaultHostname("localhost");
-        settings.setCarbonDefaultHostname("maxbussvcs.com");
+
+        settings.setCarbonClientId("clientid");
+        settings.setCarbonDefaultHostname("maxevtbus.com");
         settings.setCarbonDefaultPort("5672");
-        settings.setCarbonVirtualHostName("carbon");
-        settings.setConnectionFactoryName("andesConnectionfactory");
+        settings.setCarbonVirtualHostName("");
+        settings.setConnectionFactoryName("qpidConnectionfactory");
         settings.setConnectionFactoryNamePrefix("connectionfactory.");
-        settings.setPassword("admin");
-        settings.setQpidIcf("org.wso2.andes.jndi.PropertiesFileInitialContextFactory");
-        settings.setTopicName(TOPIC_NAME);
-        settings.setTopicNamePrefix("topic.");
-        settings.setUserName("admin");
+        settings.setPassword("guest");
+        settings.setQpidIcf("org.apache.qpid.jndi.PropertiesFileInitialContextFactory");
+        settings.setTopicName("amq.topic");
+        settings.setTopicPrefix("destination.");
+        settings.setTopicAlias("topicExchange");
+        settings.setUserName("guest");
+
         final SubscriptionDetails details = new SubscriptionDetails();
-        details.setFilterString("verb='" + TEST_VERB_2 + "'");
+        details.setFilterString("verb='" + TEST_VERB_1 + "'");
 
         final RemoteSubscriberFacade listener = new RemoteSubscriberFacade();
         listener.setName(SUBSCRIBER_NAME);
@@ -58,7 +58,6 @@ public class BareBonesMessagingEndToEndTest extends BaseMockUnitTest
         details.setListener(listener);
         details.setSubscriberName(SUBSCRIBER_NAME);
 
-        subscriber.register(settings, details);
 
         DefaultActivityMessage message = new DefaultActivityMessage();
         message.setVerb(TEST_VERB_1);
@@ -67,9 +66,11 @@ public class BareBonesMessagingEndToEndTest extends BaseMockUnitTest
         message.setObject(subject);
         new ActivityQueueManager(mock(RemoteSubscriberDao.class), false).sendMessage(settings, message.toString());
 
+        subscriber.register(settings, details);
+
         try
         {
-            Thread.sleep(5000);
+            Thread.sleep(7000);
         }
         catch (InterruptedException e)
         {

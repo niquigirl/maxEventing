@@ -21,6 +21,12 @@ public class ActivityQueueManagerTest extends BaseSpringInjectionUnitTest
     @Test
     public void sendSomething() throws IOException, JMSException, InvalidMessageException, NamingException
     {
-        activitySubscriberManager.sendMessage(MaxTopic.DataIntegrity, "{\"value\":5}");
+        activitySubscriberManager.sendMessage(MaxTopic.DataIntegrity, "{\"verb\":\"AutoOrderCountryWarehouseCurrencyDIViolationFound\"}");
+    }
+
+    @Test
+    public void testCached()
+    {
+        System.out.println(activitySubscriberManager.getCachedSubscribers());
     }
 }

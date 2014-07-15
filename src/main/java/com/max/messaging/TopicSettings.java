@@ -9,7 +9,7 @@ public class TopicSettings
     public String qpidIcf;
     private String connectionFactoryNamePrefix;
     private String connectionFactoryName;
-    private String topicNamePrefix;
+    private String topicPrefix;
     private String topicName;
     private String userName;
     private String password;
@@ -17,6 +17,7 @@ public class TopicSettings
     private String carbonVirtualHostName;
     private String carbonDefaultHostname;
     private String carbonDefaultPort;
+    private String topicAlias;
 
     public String getUserName()
     {
@@ -108,14 +109,14 @@ public class TopicSettings
         this.qpidIcf = qpidIcf;
     }
 
-    public String getTopicNamePrefix()
+    public String getTopicPrefix()
     {
-        return topicNamePrefix;
+        return topicPrefix;
     }
 
-    public void setTopicNamePrefix(String topicNamePrefix)
+    public void setTopicPrefix(String topicPrefix)
     {
-        this.topicNamePrefix = topicNamePrefix;
+        this.topicPrefix = topicPrefix;
     }
 
     public String getTopicName()
@@ -126,5 +127,15 @@ public class TopicSettings
     public void setTopicName(String topicName)
     {
         this.topicName = topicName;
+    }
+
+    public String getTopicAlias()
+    {
+        return topicAlias;
+    }
+
+    public void setTopicAlias(String topicAlias)
+    {
+        this.topicAlias = topicAlias;
     }
 }

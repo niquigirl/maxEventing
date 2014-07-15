@@ -10,9 +10,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
-import org.wso2.andes.client.message.JMSTextMessage;
 
-import javax.jms.JMSException;
 import javax.net.ssl.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,7 +42,7 @@ public class RemoteSubscriberFacade extends MaxMessageListener
      * @param activityMessage {@link com.max.web.model.DefaultActivityMessage}
      */
     @Override
-    public HandlerResults onMessage(JMSTextMessage activityMessage)
+    public HandlerResults onMessage(String activityMessage)
     {
         getLogger().debug(this + " _ " + getName() + ": Handling message for remote subscriber");
         final SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
@@ -52,27 +50,21 @@ public class RemoteSubscriberFacade extends MaxMessageListener
 
         try
         {
-            getLogger().debug("RemoteSubscriberFacade sending message: " + activityMessage.getText());
+            getLogger().debug("RemoteSubscriberFacade sending message: " + activityMessage);
 /*
             RestTemplate restTemplate = new RestTemplate(requestFactory);
             final JSONObject request = new JSONObject(activityMessage.getText());
             getLogger().debug("JSONObject: " + request);
             final HandlerResults handlerResults = restTemplate.postForObject(getServiceUrl(), new JSONObject(activityMessage.getText()), HandlerResults.class);
 */
-            final HandlerResults handlerResults = forwardMessage(activityMessage.getText(), getServiceUrl());
+            final HandlerResults handlerResults = forwardMessage(activityMessage, getServiceUrl());
             final String message = getName() + ": Received the following results from " + getServiceUrl() + " : " + handlerResults;
             getLogger().debug(message);
-            return new HandlerResults(message, true);
+            return new HandlerResults(message, handlerResults.isSuccess());
         }
         catch (RestClientException e)
         {
             final String message = "Could not send message to remote subscriber URL " + getServiceUrl() + " : " + e.getMessage();
-            getLogger().error(message, e);
-            return new HandlerResults(message, false);
-        }
-        catch (JMSException e)
-        {
-            final String message = "Could not get message text from message " + activityMessage + " : " + e.getMessage();
             getLogger().error(message, e);
             return new HandlerResults(message, false);
         }
@@ -94,7 +86,7 @@ public class RemoteSubscriberFacade extends MaxMessageListener
 
             if (url.getProtocol().equalsIgnoreCase("https"))
             {
-                final SSLSocketFactory sslSocketFactory = disableCertificateValidation();
+                disableCertificateValidation();
                 conn = (HttpsURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
             }

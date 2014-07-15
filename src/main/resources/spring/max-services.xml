@@ -10,16 +10,31 @@
     <bean name="userActivityDurableTopicSubscriber" class="com.max.messaging.wso2.WSO2DurableTopicSubscriber"/>
 
     <bean id="parentWSO2TopicSettings" class="com.max.messaging.TopicSettings">
-        <property name="qpidIcf" value="org.wso2.andes.jndi.PropertiesFileInitialContextFactory"/>
-        <property name="carbonClientId" value="carbon"/>
+        <property name="qpidIcf" value="${jms.qpidicf}"/>
+        <property name="carbonClientId" value="${jms.client.id}"/>
         <property name="carbonDefaultHostname" value="${jms.host}"/>
-        <property name="carbonDefaultPort" value="5672"/>
-        <property name="connectionFactoryName" value="andesConnectionfactory"/>
-        <property name="connectionFactoryNamePrefix" value="connectionfactory."/>
-        <property name="topicNamePrefix" value="topic."/>
-        <property name="carbonVirtualHostName" value="carbon"/>
+        <property name="carbonDefaultPort" value="${jms.port}"/>
+        <property name="connectionFactoryName" value="${jms.connectionfactory.name}"/>
+        <property name="connectionFactoryNamePrefix" value="${jms.connectionfactory.prefix}"/>
+        <property name="topicPrefix" value="${jms.topic.prefix}"/>
+        <property name="carbonVirtualHostName" value=""/>
         <property name="userName" value="${jms.username}"/>
         <property name="password" value="${jms.password}"/>
+        <property name="topicAlias" value="amq.topic"/>
+<!--//        settings.setCarbonDefaultHostname("localhost");
+        settings.setCarbonDefaultHostname("maxevtbus.com");
+//        settings.setCarbonDefaultHostname("maxbussvcs.com");
+        settings.setCarbonDefaultPort("5672");
+        settings.setCarbonVirtualHostName("");
+        settings.setConnectionFactoryName("qpidConnectionfactory");
+        settings.setConnectionFactoryNamePrefix("connectionfactory.");
+        settings.setPassword("guest");
+        settings.setQpidIcf("org.apache.qpid.jndi.PropertiesFileInitialContextFactory");
+        settings.setTopicName("amq.topic");
+        settings.setTopicPrefix("destination.");
+        settings.setTopicAlias("topicExchange");
+        settings.setUserName("guest");
+-->
     </bean>
 
     <bean id="userActivityTopicSettings" parent="parentWSO2TopicSettings">

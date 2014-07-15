@@ -6,7 +6,7 @@
     <appender name="rollingFileAppender" class="org.apache.log4j.RollingFileAppender">
         <param name="file" value="/var/log/maxqueue.log"/>
         <param name="MaxFileSize" value="20MB"/>
-        <param name="MaxBackupIndex" value="1"/>
+        <param name="MaxBackupIndex" value="10"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %-17c{2} (%13F:%L) %3x - %m%n" />
         </layout>

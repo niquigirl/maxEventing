@@ -57,6 +57,11 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
 
     private static SubscriberCache cache = new SubscriberCache();
 
+    public Collection<SubscriptionDetails> getCachedSubscribers()
+    {
+        return cache.getCachedSubscribers();
+    }
+
     public ActivityQueueManager(RemoteSubscriberDao remoteSubscriberDao, boolean autoRegisterRemoteSubscribers) throws InvalidSubscriberException
     {
         this.remoteSubscriberDao = remoteSubscriberDao;
@@ -96,7 +101,7 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
         Properties properties = new Properties();
         properties.put(Context.INITIAL_CONTEXT_FACTORY, settings.getQpidIcf());
         properties.put(settings.getConnectionFactoryNamePrefix() + settings.getConnectionFactoryName(), getTCPConnectionURL(settings));
-        properties.put(settings.getTopicNamePrefix() + settings.getTopicName(), settings.getTopicName());
+        properties.put(settings.getTopicPrefix() + settings.getTopicAlias(), settings.getTopicName());
 
         InitialContext ctx = new InitialContext(properties);
 
@@ -107,7 +112,7 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
 
         TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
         // Send message
-        Topic topic = (Topic) ctx.lookup(settings.getTopicName());
+        Topic topic = (Topic) ctx.lookup(settings.getTopicAlias());
         // create the message to send
         TextMessage objectMessage = topicSession.createTextMessage(msgObject);
 

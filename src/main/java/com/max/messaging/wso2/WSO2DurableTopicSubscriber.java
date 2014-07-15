@@ -49,7 +49,7 @@ public class WSO2DurableTopicSubscriber implements DurableTopicSubscriber
             Properties properties = new Properties();
             properties.put(Context.INITIAL_CONTEXT_FACTORY, settings.getQpidIcf());
             properties.put(settings.getConnectionFactoryNamePrefix() + settings.getConnectionFactoryName(), getTCPConnectionURL(settings));
-            properties.put(settings.getTopicNamePrefix() + settings.getTopicName(), settings.getTopicName());
+            properties.put(settings.getTopicPrefix() + settings.getTopicAlias(), settings.getTopicName());
 
             InitialContext ctx = new InitialContext(properties);
 
@@ -60,7 +60,7 @@ public class WSO2DurableTopicSubscriber implements DurableTopicSubscriber
             topicSession = topicConnection.createTopicSession(false, QueueSession.AUTO_ACKNOWLEDGE);
 
             // create durable subscriber with subscription ID
-            Topic topic = (Topic) ctx.lookup(settings.getTopicName());
+            Topic topic = (Topic) ctx.lookup(settings.getTopicAlias());
             topicSubscriber = topicSession.createDurableSubscriber(topic, details.getSubscriberName(), details.getFilterString(), false);
 
             topicSubscriber.setMessageListener(details.getListener());
@@ -85,19 +85,16 @@ public class WSO2DurableTopicSubscriber implements DurableTopicSubscriber
             Properties properties = new Properties();
             properties.put(Context.INITIAL_CONTEXT_FACTORY, settings.getQpidIcf());
             properties.put(settings.getConnectionFactoryNamePrefix() + settings.getConnectionFactoryName(), getTCPConnectionURL(settings));
-            properties.put(settings.getTopicNamePrefix() + settings.getTopicName(), settings.getTopicName());
+            properties.put(settings.getTopicPrefix() + settings.getTopicName(), settings.getTopicName());
 
             InitialContext ctx = new InitialContext(properties);
 
             // Lookup connection factory
             TopicConnectionFactory connFactory = (TopicConnectionFactory) ctx.lookup(settings.getConnectionFactoryName());
             topicConnection = connFactory.createTopicConnection();
-//            setTopicConnection(topicConnection);
             topicConnection.start();
-//            setTopicSession(topicConnection.createTopicSession(false, QueueSession.AUTO_ACKNOWLEDGE));
             topicSession = topicConnection.createTopicSession(false, QueueSession.AUTO_ACKNOWLEDGE);
 
-//            setTopicSubscriber(getTopicSession().createDurableSubscriber(topic, details.getSubscriberName(), details.getFilterString(), false));
             topicSession.unsubscribe(subscriberName);
         }
         catch (NamingException | JMSException e)
@@ -121,39 +118,3 @@ public class WSO2DurableTopicSubscriber implements DurableTopicSubscriber
 
 }
 
-
-/*
-    public void register()
-    {
-        try
-        {
-            TopicSettings settings = getTopicSettings();
-
-            System.out.println("Starting the subscriber " + this);
-            Properties properties = new Properties();
-            properties.put(Context.INITIAL_CONTEXT_FACTORY, settings.getQpidIcf());
-            properties.put(settings.getConnectionFactoryNamePrefix() + settings.getConnectionFactoryName(), getTCPConnectionURL());
-            properties.put(settings.getTopicNamePrefix() + settings.getTopicName(), settings.getTopicName());
-
-            InitialContext ctx = new InitialContext(properties);
-
-            // Lookup connection factory
-            TopicConnectionFactory connFactory = (TopicConnectionFactory) ctx.lookup(getTopicSettings().getConnectionFactoryName());
-            TopicConnection topicConnection = connFactory.createTopicConnection();
-            setTopicConnection(topicConnection);
-            topicConnection.start();
-            setTopicSession(topicConnection.createTopicSession(false, QueueSession.AUTO_ACKNOWLEDGE));
-
-            // create durable subscriber with subscription ID
-            Topic topic = (Topic) ctx.lookup(settings.getTopicName());
-            System.out.println("-- Registering " + getSubscriberName() + " with filter " + getFilterString());
-            setTopicSubscriber(getTopicSession().createDurableSubscriber(topic, getSubscriberName(), getFilterString(), false));
-
-            getTopicSubscriber().setMessageListener(this);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-*/

@@ -34,7 +34,7 @@ public class PublishMessageServlet implements HttpRequestHandler
         Scanner s = new Scanner(request.getInputStream(), "UTF-8").useDelimiter("\\A");
         String body = s.hasNext() ? s.next() : "";
 
-        log.debug("Servicing request to publish a message to topic: " + topic + " :  " + body);
+        log.debug("Servicing request to publish a message to topic: " + topic + ":  " + body);
 
         HandlerResults results;
         try

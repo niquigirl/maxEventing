@@ -1,6 +1,7 @@
 package com.max.web.controller;
 
 import com.max.db.dao.RemoteSubscriberDao;
+import com.max.services.impl.ActivityQueueManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,10 +23,15 @@ public class SeeSubscribersServlet implements HttpRequestHandler
     @Autowired
     RemoteSubscriberDao remoteSubscriberDao;
 
+    @Autowired
+    ActivityQueueManager activityQueueManager;
+
     @Override
     public void handleRequest(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
     {
         log.debug("Just hit See Subscribers");
         log.debug("Found stuff: " + remoteSubscriberDao.findAll().toString());
+
+        log.debug("Cached: " + activityQueueManager.getCachedSubscribers());
     }
 }

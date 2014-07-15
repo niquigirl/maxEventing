@@ -2,10 +2,11 @@ package com.max.services;
 
 import com.max.web.model.HandlerResults;
 import org.apache.log4j.Logger;
-import org.wso2.andes.client.message.JMSTextMessage;
 
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 
 /**
  * This should be extended by any listener, which takes the generic JMS stuff and casts it to
@@ -15,7 +16,7 @@ public abstract class MaxMessageListener implements MessageListener
 {
     Logger log = Logger.getLogger(MaxMessageListener.class);
 
-    public abstract HandlerResults onMessage(JMSTextMessage activityMessage);
+    public abstract HandlerResults onMessage(String activityMessage);
 
     private String name;
 
@@ -27,9 +28,22 @@ public abstract class MaxMessageListener implements MessageListener
     final public void onMessage(Message message)
     {
         System.out.println("*********************** Responding::: Starting onMessage " + name);
-        final HandlerResults handlerResults = onMessage((JMSTextMessage) message);
+        try
+        {
+            HandlerResults handlerResults;
 
-        log.info("Handler " + getName() + " results: " + handlerResults);
+            if (message instanceof TextMessage)
+                handlerResults = onMessage(((TextMessage) message).getText());
+            else
+                handlerResults = new HandlerResults("Text Messages only!", false);
+
+            log.info("Handler " + getName() + " results: " + handlerResults);
+        }
+        catch (JMSException e)
+        {
+            final String error = "Could not get message text from message " + message + " : " + e.getMessage();
+            log.error(error, e);
+        }
     }
 
     public String getName()

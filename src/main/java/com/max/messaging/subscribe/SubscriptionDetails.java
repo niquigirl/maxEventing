@@ -2,6 +2,7 @@ package com.max.messaging.subscribe;
 
 import com.max.messaging.MaxTopic;
 import com.max.services.MaxMessageListener;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * This is simply a representation of what subscription details should be
@@ -51,5 +52,11 @@ public class SubscriptionDetails
     public void setTopic(MaxTopic topic)
     {
         this.topic = topic;
+    }
+
+    @Override
+    public String toString()
+    {
+        return new ToStringBuilder(this).append("name", getSubscriberName()).append("topic", getTopic()).append("filterString", getFilterString()).build();
     }
 }
