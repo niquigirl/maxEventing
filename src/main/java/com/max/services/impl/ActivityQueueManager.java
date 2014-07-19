@@ -147,6 +147,9 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
             validateSubscriber(curSubscriber);
             curSubscriber.setAutoRegister(true);
             curSubscriber.setFilterString(subscription.getFilterString());
+            curSubscriber.setRestUrl(subscription.getRestUrl());
+            curSubscriber.setTimeout(subscription.getTimeout());
+            curSubscriber.setTopic(subscription.getTopic());
         }
         else
             curSubscriber = subscription.toData();
@@ -234,6 +237,7 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
      */
     private void doRegister(RemoteSubscriber curSubscriber) throws InvalidSubscriberException, TopicManagementException
     {
+        log.info("Doing registration for " + curSubscriber.getRestUrl());
         SubscriptionDetails details = buildSubscriptionDetails(curSubscriber);
 
         if (details != null)

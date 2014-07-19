@@ -50,7 +50,7 @@ public class RemoteSubscriberFacade extends MaxMessageListener
 
         try
         {
-            getLogger().debug("RemoteSubscriberFacade sending message: " + activityMessage);
+            getLogger().debug("RemoteSubscriberFacade sending message: " + activityMessage + " to " + getServiceUrl());
 /*
             RestTemplate restTemplate = new RestTemplate(requestFactory);
             final JSONObject request = new JSONObject(activityMessage.getText());

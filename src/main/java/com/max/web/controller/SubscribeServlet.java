@@ -38,7 +38,7 @@ public class SubscribeServlet implements HttpRequestHandler
         final ObjectReader reader = mapper.reader(RemoteSubscription.class);
 
         RemoteSubscription subscription = reader.readValue(body);
-        log.debug("Servicing request to subscribe to topic: " + subscription.getTopic() + " : name: " + subscription.getName());
+        log.debug("Servicing request to subscribe to topic: " + subscription.getTopic() + " : name: " + subscription.getName() + " rest url " + subscription.getRestUrl());
 
         HandlerResults results;
         try
