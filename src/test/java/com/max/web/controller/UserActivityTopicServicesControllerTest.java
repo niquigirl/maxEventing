@@ -4,6 +4,7 @@ import com.max.BaseSpringInjectionUnitTest;
 import com.max.db.dao.RemoteSubscriberDao;
 import com.max.db.model.RemoteSubscriber;
 import com.max.messaging.MaxTopic;
+import com.max.services.impl.ActivityQueueManager;
 import com.max.web.model.DefaultActivityMessage;
 import com.max.web.model.RemoteSubscription;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -27,10 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 //@Ignore // Actually runs subscription and stuff, so only use it when you know what you're doing
 public class UserActivityTopicServicesControllerTest extends BaseSpringInjectionUnitTest
 {
-/*
     @Autowired
-    UserActivityTopicServicesController services;
-*/
+    ActivityQueueManager services;
 
     @Autowired
     RemoteSubscriberDao repository;
@@ -107,7 +106,7 @@ public class UserActivityTopicServicesControllerTest extends BaseSpringInjection
     @Test
     public void testUnsubscribe() throws Exception
     {
-        MaxTopic topic = MaxTopic.DataIntegrity;
-        //services.unsubscribe("", "", "", topic, "DefaultTester");
+        MaxTopic topic = MaxTopic.DataIntegrity_test;
+        services.unregister(topic, "TestSubscriber_Customer2");
     }
 }

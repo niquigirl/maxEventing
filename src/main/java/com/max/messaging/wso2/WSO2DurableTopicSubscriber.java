@@ -27,7 +27,6 @@ import org.apache.log4j.Logger;
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import java.util.Properties;
 
 public class WSO2DurableTopicSubscriber implements DurableTopicSubscriber
@@ -58,6 +57,7 @@ public class WSO2DurableTopicSubscriber implements DurableTopicSubscriber
             topicConnection = connFactory.createTopicConnection();
             topicConnection.start();
             topicSession = topicConnection.createTopicSession(false, QueueSession.AUTO_ACKNOWLEDGE);
+            details.setTopicSession(topicSession);
 
             // create durable subscriber with subscription ID
             Topic topic = (Topic) ctx.lookup(settings.getTopicAlias());
@@ -73,32 +73,22 @@ public class WSO2DurableTopicSubscriber implements DurableTopicSubscriber
     }
 
     @Override
-    public void unregister(TopicSettings settings, String subscriberName) throws TopicManagementException
+    public void unregister(TopicSettings settings, SubscriptionDetails subscriber) throws TopicManagementException
     {
-        TopicConnection topicConnection;
-        TopicSession topicSession;
+        if (subscriber == null)
+            throw new TopicManagementException("Not sure how you got a null subscriber to me, but stop it");
 
-        log.info("Unregistering " + subscriberName + " from Topic " + settings.getTopicName());
+        String subscriberName = subscriber.getSubscriberName();
+
+        log.info("Unregistering " + subscriberName + " from Topic " + subscriber.getTopic().name());
 
         try
         {
-            Properties properties = new Properties();
-            properties.put(Context.INITIAL_CONTEXT_FACTORY, settings.getQpidIcf());
-            properties.put(settings.getConnectionFactoryNamePrefix() + settings.getConnectionFactoryName(), getTCPConnectionURL(settings));
-            properties.put(settings.getTopicPrefix() + settings.getTopicName(), settings.getTopicName());
-
-            InitialContext ctx = new InitialContext(properties);
-
-            // Lookup connection factory
-            TopicConnectionFactory connFactory = (TopicConnectionFactory) ctx.lookup(settings.getConnectionFactoryName());
-            topicConnection = connFactory.createTopicConnection();
-            topicConnection.start();
-            topicSession = topicConnection.createTopicSession(false, QueueSession.AUTO_ACKNOWLEDGE);
-
-            topicSession.unsubscribe(subscriberName);
+            subscriber.getTopicSession().unsubscribe(subscriberName);
         }
-        catch (NamingException | JMSException e)
+        catch (Exception e)
         {
+            log.error(e);
             e.printStackTrace();
             throw new TopicManagementException("Could not unregister " + subscriberName + " " + e.getMessage());
         }

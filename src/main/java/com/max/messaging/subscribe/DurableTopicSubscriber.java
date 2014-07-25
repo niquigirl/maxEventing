@@ -8,5 +8,5 @@ import com.max.messaging.TopicSettings;
 public interface DurableTopicSubscriber
 {
     public void register(TopicSettings settings, SubscriptionDetails details) throws TopicManagementException;
-    public void unregister(TopicSettings settings, String subscriberName) throws TopicManagementException;
+    public void unregister(TopicSettings settings, SubscriptionDetails subscriber) throws TopicManagementException;
 }

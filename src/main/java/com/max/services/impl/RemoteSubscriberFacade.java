@@ -103,6 +103,7 @@ public class RemoteSubscriberFacade extends MaxMessageListener
         }
         catch (Exception e)
         {
+            log.error(e);
             e.printStackTrace();
             return new HandlerResults("Could not place call to publish message: " + e.getMessage(), false);
         }
@@ -181,10 +182,12 @@ public class RemoteSubscriberFacade extends MaxMessageListener
                     response.append(input);
                 }
 
+                log.debug("Received the following response from " + con.getURL() + " before translating : " + response);
                 return response.length() <= 0 ? null : response.toString();
             }
             catch (Exception e)
             {
+                log.error(e);
                 e.printStackTrace();
             }
         }
@@ -227,6 +230,7 @@ public class RemoteSubscriberFacade extends MaxMessageListener
         }
         catch (Exception e)
         {
+            log.error(e);
             e.printStackTrace();
             throw e;
         }

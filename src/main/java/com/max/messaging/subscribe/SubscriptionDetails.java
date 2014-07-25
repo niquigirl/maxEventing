@@ -4,6 +4,8 @@ import com.max.messaging.MaxTopic;
 import com.max.services.MaxMessageListener;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.jms.TopicSession;
+
 /**
  * This is simply a representation of what subscription details should be
  */
@@ -13,6 +15,7 @@ public class SubscriptionDetails
     private String subscriberName;
     private String filterString;
     private MaxTopic topic;
+    private TopicSession topicSession;
 
     public MaxMessageListener getListener()
     {
@@ -52,6 +55,16 @@ public class SubscriptionDetails
     public void setTopic(MaxTopic topic)
     {
         this.topic = topic;
+    }
+
+    public TopicSession getTopicSession()
+    {
+        return topicSession;
+    }
+
+    public void setTopicSession(TopicSession topicSession)
+    {
+        this.topicSession = topicSession;
     }
 
     @Override

@@ -66,6 +66,7 @@ public class RemoteSubscriberDao
         }
         catch (SQLException | IllegalArgumentException e)
         {
+            log.error(e);
             e.printStackTrace();
         }
 
@@ -199,6 +200,7 @@ public class RemoteSubscriberDao
         }
         catch (SQLException | IllegalArgumentException e)
         {
+            log.error(e);
             e.printStackTrace();
         }
 

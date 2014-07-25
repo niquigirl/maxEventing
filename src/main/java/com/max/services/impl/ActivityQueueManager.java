@@ -177,11 +177,13 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
     public void unregister(MaxTopic topic, @NotNull String subscriberName) throws TopicManagementException
     {
         final SubscriptionDetails subscriber = cache.getCachedSubscriber(topic, subscriberName);
+        log.debug("Subscriber found in cache? " + (subscriber != null));
+
+        topicSubscriber.unregister(topicSettings.get(topic), subscriber);
+
+        deactivateSubscriberInRegistry(topic, subscriberName);
         if (subscriber != null)
         {
-            topicSubscriber.unregister(getTopicSettings().get(topic), subscriberName);
-            deactivateSubscriberInRegistry(topic, subscriberName);
-
             cache.removeCachedSubscriber(topic, subscriberName);
         }
     }

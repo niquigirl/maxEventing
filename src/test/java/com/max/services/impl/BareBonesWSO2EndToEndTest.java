@@ -2,6 +2,7 @@ package com.max.services.impl;
 
 import com.max.BaseMockUnitTest;
 import com.max.db.dao.RemoteSubscriberDao;
+import com.max.messaging.MaxTopic;
 import com.max.messaging.TopicSettings;
 import com.max.messaging.publish.InvalidMessageException;
 import com.max.messaging.subscribe.SubscriptionDetails;
@@ -57,6 +58,7 @@ public class BareBonesWSO2EndToEndTest extends BaseMockUnitTest
         listener.setServiceUrl(TESTER_SERVICE_URL);
         details.setListener(listener);
         details.setSubscriberName(SUBSCRIBER_NAME);
+        details.setTopic(MaxTopic.DataIntegrity);
 
 
         DefaultActivityMessage message = new DefaultActivityMessage();
@@ -76,5 +78,7 @@ public class BareBonesWSO2EndToEndTest extends BaseMockUnitTest
         {
             // Short hair, don't care
         }
+
+        subscriber.unregister(settings, details);
     }
 }
