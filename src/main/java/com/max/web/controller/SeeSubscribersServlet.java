@@ -33,5 +33,7 @@ public class SeeSubscribersServlet implements HttpRequestHandler
         log.debug("Found stuff: " + remoteSubscriberDao.findAll().toString());
 
         log.debug("Cached: " + activityQueueManager.getCachedSubscribers());
+
+        httpServletResponse.getOutputStream().write(("Currently Registered: " + activityQueueManager.getCachedSubscribers()).getBytes());
     }
 }
