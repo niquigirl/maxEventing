@@ -17,9 +17,9 @@ public class DefaultActivityMessage extends JsonData
     @JsonIgnore
     public static final String VERB = "verb";
     @JsonIgnore
-    public static final Object ACTOR_OBJECT_TYPE = "actor.objectType";
+    public static final Object ACTOR_OBJECT_TYPE = "actorObjectType";
     @JsonIgnore
-    public static final Object SUBJECT_OBJECT_TYPE = "subject.objectType";
+    public static final Object SUBJECT_OBJECT_TYPE = "subjectObjectType";
 
     private Actor actor;
     private Subject object;

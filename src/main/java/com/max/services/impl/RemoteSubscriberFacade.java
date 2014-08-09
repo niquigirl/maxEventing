@@ -70,6 +70,22 @@ public class RemoteSubscriberFacade extends MaxMessageListener
         }
     }
 
+    public static class MessageSender implements Runnable
+    {
+        String message;
+        String serviceUrl;
+
+        public MessageSender(String serviceUrl, String message)
+        {
+            this.message = message;
+            this.serviceUrl = serviceUrl;
+        }
+        @Override
+        public void run()
+        {
+
+        }
+    }
     /**
      * Front method to determine how to call the registrar's service Url and call the appropriate method
      * depending on the URL protocol

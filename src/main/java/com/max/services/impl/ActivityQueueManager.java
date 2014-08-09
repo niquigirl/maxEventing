@@ -337,6 +337,7 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
             new Thread(new SubscriberAutoRegistrar()).start();
         }
 
+
         log.info("Successfully completed starting app");
     }
 
@@ -346,6 +347,7 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
         @Override
         public void run()
         {
+            int iterations = 0;
             while (!Thread.interrupted())
             {
                 try
@@ -357,14 +359,20 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
                     // Don't care
                 }
 
-                registerAllManagedListeners();
+                if (registerAllManagedListeners() || iterations >= 20)
+                    break;
+
+                iterations++;
             }
+
+            if (iterations >= 20)
+                log.error("Couldn't register all subscribers after 20 attempts!");
         }
 
         /**
          * From all RemoteSubscribers found in the data store, register a new RemoteSubscriberFacade
          */
-        public void registerAllManagedListeners()
+        public boolean registerAllManagedListeners()
         {
             final Collection<RemoteSubscriber> remoteSubscribers = getRemoteSubscriberDao().findByAutoRegister(true);
 
@@ -389,9 +397,9 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
             {
                 log.error("Failure to register subscribers on startup: " + errorMessage);
             }
+
+            return !hasErrors;
         }
-
-
     }
 
     /**
@@ -402,7 +410,7 @@ public class ActivityQueueManager implements QueueManager, ApplicationContextAwa
         private final HashMap<String, SubscriptionDetails> remoteSubscribersCache = new HashMap<>();
 
         /**
-         * Cache a {@link com.max.services.MaxMessageListener} under the subscriber name
+         * Cache a {@link com.max.messaging.subscribe.SubscriptionDetails} under the subscriber name
          *
          * @param subscriberName {@code String}
          * @param details {@link com.max.messaging.subscribe.SubscriptionDetails}
